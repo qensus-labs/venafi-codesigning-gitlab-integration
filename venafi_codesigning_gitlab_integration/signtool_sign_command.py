@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import List
-import envparse, tempfile, utils
+import envparse, tempfile
+import venafi_codesigning_gitlab_integration.utils
 
 config_schema = dict(
     TPP_AUTH_URL=str,
@@ -61,3 +62,16 @@ class SigntoolSignCommand:
 
     def _create_temp_dir(self):
         return tempfile.TemporaryDirectory()
+
+
+def main():
+    try:
+        config = SigntoolSignConfig.from_env()
+        command = SigntoolSignCommand(config)
+    except envparse.ConfigurationError as e:
+        print(e, file=sys.stderr)
+        sys.exit(1)
+    command.run()
+
+if __name__ == '__main__':
+    main()

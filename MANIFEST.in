@@ -1,0 +1,1 @@
+include venafi_codesigning_gitlab_integration/support/java/*.class
