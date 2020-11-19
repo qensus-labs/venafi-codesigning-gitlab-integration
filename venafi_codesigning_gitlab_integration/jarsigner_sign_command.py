@@ -75,7 +75,7 @@ class JarsignerSignCommand:
         if hasattr(self, 'temp_dir'):
             self.temp_dir.cleanup()
 
-    def _get_input_paths(self):
+    def _get_input_paths(self) -> List[str]:
         if self.config.input_path is not None:
             self.input_paths = [self.config.input_path]
         else:
@@ -90,7 +90,7 @@ class JarsignerSignCommand:
             self._pkcs11_provider_config_path(),
             self.config.venafi_client_tools_dir)
 
-    def _pkcs11_provider_config_path(self):
+    def _pkcs11_provider_config_path(self) -> str:
         return os.path.join(self.temp_dir.name, 'pkcs11-provider.conf')
 
     def _login_tpp(self):

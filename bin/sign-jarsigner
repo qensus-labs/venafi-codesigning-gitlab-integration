@@ -1,3 +1,0 @@
-#!/bin/sh
-set -e
-python3 -mvenafi_codesigning_gitlab_integration.jarsigner_sign_command "$@"

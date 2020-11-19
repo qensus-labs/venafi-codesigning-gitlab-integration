@@ -1,7 +1,13 @@
 *.pyc
 *.class
 *.egg-info
+*.md
+*.in
+*.txt
 
+.editorconfig
+.gitignore
+.flake8
 .DS_Store
 .pytest_cache
 __pycache__
@@ -9,3 +15,4 @@ __pycache__
 /build
 /dist
 /venv
+/test
