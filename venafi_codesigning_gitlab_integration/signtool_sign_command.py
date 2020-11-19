@@ -3,6 +3,7 @@ from typing import List
 from venafi_codesigning_gitlab_integration import utils
 import envparse
 import tempfile
+import logging
 import sys
 
 config_schema = dict(
@@ -77,8 +78,9 @@ class SigntoolSignCommand:
 
 def main():
     try:
+        logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)-8s %(message)s')
         config = SigntoolSignConfig.from_env()
-        command = SigntoolSignCommand(config)
+        command = SigntoolSignCommand(logging.getLogger(), config)
     except envparse.ConfigurationError as e:
         print(e, file=sys.stderr)
         sys.exit(1)

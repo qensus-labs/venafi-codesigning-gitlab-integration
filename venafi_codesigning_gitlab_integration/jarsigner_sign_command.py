@@ -3,6 +3,7 @@ from typing import List
 from venafi_codesigning_gitlab_integration import utils
 import envparse
 import tempfile
+import logging
 import sys
 import os
 import glob
@@ -202,8 +203,9 @@ class JarsignerSignCommand:
 
 def main():
     try:
+        logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)-8s %(message)s')
         config = JarsignerSignConfig.from_env()
-        command = JarsignerSignCommand(config)
+        command = JarsignerSignCommand(logging.getLogger(), config)
     except envparse.ConfigurationError as e:
         print(e, file=sys.stderr)
         sys.exit(1)
