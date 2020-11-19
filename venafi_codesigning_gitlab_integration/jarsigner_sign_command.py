@@ -1,7 +1,15 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import List
-import envparse, tempfile, secrets, traceback, random
-import venafi_codesigning_gitlab_integration.utils
+from venafi_codesigning_gitlab_integration import utils
+import envparse
+import tempfile
+import sys
+import os
+import glob
+import secrets
+import subprocess
+import traceback
+import random
 
 config_schema = dict(
     TPP_AUTH_URL=str,
@@ -17,6 +25,7 @@ config_schema = dict(
     EXTRA_CLI_ARGS=dict(cast=list, subcast=str, default=()),
     VENAFI_CLIENT_TOOLS_DIR=dict(cast=str, default=None),
 )
+
 
 @dataclass
 class JarsignerSignConfig:
@@ -36,6 +45,7 @@ class JarsignerSignConfig:
     @classmethod
     def from_env(cls):
         return cls(utils.create_dataclass_inputs_from_env(config_schema))
+
 
 class JarsignerSignCommand:
     def __init__(self, logger, config: JarsignerSignConfig):
@@ -90,24 +100,25 @@ class JarsignerSignCommand:
             'Error requesting grant from TPP',
             'pkcs11config getgrant',
             command=[
-                utils.get_pkcs11config_tool_path(self.config.venafi_client_tools_dir),
+                utils.get_pkcs11config_tool_path(
+                    self.config.venafi_client_tools_dir),
                 'getgrant',
                 '--force',
                 '--authurl=' + self.config.tpp_auth_url,
                 '--hsmurl=' + self.config.tpp_hsm_url,
                 '--username=' + self.config.tpp_username,
                 '--password',
-                self.config.tpp_password,
+                self.config.tpp_password
             ],
             mask=[
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                true
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                False,
+                True
             ],
             envs={
                 'LIBHSMINSTANCE': self.session_id
@@ -122,7 +133,8 @@ class JarsignerSignCommand:
                 'Error revoking grant from TPP',
                 'pkcs11config revokegrant',
                 command=[
-                    utils.get_pkcs11config_tool_path(self.config.venafi_client_tools_dir),
+                    utils.get_pkcs11config_tool_path(
+                        self.config.venafi_client_tools_dir),
                     'revokegrant',
                     '-force',
                     '-clear'
@@ -131,12 +143,12 @@ class JarsignerSignCommand:
                     'LIBHSMINSTANCE': self.session_id
                 }
             )
-        except Exception as e:
+        except Exception:
             # Don't reraise exception: allow temp_dir to be cleaned up
             traceback.print_exc()
 
     def _invoke_jarsigner(self):
-        envs = { 'LIBHSMINSTANCE': self.session_id }
+        envs = {'LIBHSMINSTANCE': self.session_id}
         for input_path in self.input_paths:
             command = [
                 'jarsigner',
@@ -156,7 +168,8 @@ class JarsignerSignCommand:
 
             if len(self.config.timestamping_servers) > 0:
                 command.append('-tsa')
-                command.append(random.choice(self.config.timestamping_servers))
+                command.append(random.choice(
+                    self.config.timestamping_servers))
 
             command += self.config.extra_cli_args
 
@@ -173,15 +186,16 @@ class JarsignerSignCommand:
             )
 
     def _invoke_command(self, pre_message, success_message, error_message, short_cmdline,
-            command, masks=None, env=None):
+                        command, masks=None, env=None):
         self.logger.info(pre_message)
-        utils.log_subprocess_run(logger, command, masks)
+        utils.log_subprocess_run(self.logger, command, masks)
         proc = subprocess.run(command, capture_output=True, text=True, env=env)
         if proc.returncode == 0:
-            logger.info(success_message)
+            self.logger.info(success_message)
             return proc.stdout
         else:
-            logger.info("%s: command exited with code %d. Output from command '%s' is as follows:\n%s",
+            self.logger.info(
+                "%s: command exited with code %d. Output from command '%s' is as follows:\n%s",
                 error_message, proc.returncode, short_cmdline, proc.stdout)
             raise utils.AbortException()
 
@@ -197,6 +211,7 @@ def main():
         command.run()
     except utils.AbortException:
         sys.exit(1)
+
 
 if __name__ == '__main__':
     main()

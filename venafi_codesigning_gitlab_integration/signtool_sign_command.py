@@ -1,7 +1,9 @@
 from dataclasses import dataclass
 from typing import List
-import envparse, tempfile
-import venafi_codesigning_gitlab_integration.utils
+from venafi_codesigning_gitlab_integration import utils
+import envparse
+import tempfile
+import sys
 
 config_schema = dict(
     TPP_AUTH_URL=str,
@@ -22,8 +24,9 @@ config_schema = dict(
     MACHINE_CONFIGURATION=dict(cast=bool, default=False),
 )
 
+
 @dataclass
-class JarsignerSignConfig:
+class SigntoolSignConfig:
     tpp_auth_url: str
     tpp_hsm_url: str
     tpp_username: str
@@ -45,11 +48,14 @@ class JarsignerSignConfig:
     def from_env(cls):
         return cls(utils.create_dataclass_inputs_from_env(config_schema))
 
+
 class SigntoolSignCommand:
     def __init__(self, logger, config: SigntoolSignConfig):
-        if config.certificate_subject_name is not None and config.certificate_subject_sha1 is not None:
+        if config.certificate_subject_name is not None and \
+           config.certificate_subject_sha1 is not None:
             raise envparse.ConfigurationError(
-                "Only one of 'CERTIFICATE_SUBJECT_NAME' or 'CERTIFICATE_SHA1' may be set, but not both")
+                "Only one of 'CERTIFICATE_SUBJECT_NAME' or "
+                "'CERTIFICATE_SHA1' may be set, but not both")
 
         self.logger = logger
         self.config = config
@@ -80,6 +86,7 @@ def main():
         command.run()
     except utils.AbortException:
         sys.exit(1)
+
 
 if __name__ == '__main__':
     main()

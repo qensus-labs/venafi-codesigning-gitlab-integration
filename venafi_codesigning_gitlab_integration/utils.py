@@ -1,11 +1,21 @@
-import envparse, os, sys, textwrap, json, pathlib, subprocess, shlex
+import envparse
+import os
+import sys
+import errno
+import textwrap
+import json
+import pathlib
+import subprocess
+import shlex
 if os.name == 'nt':
     import winreg
 
 support_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'support'))
 
+
 class AbortException(Exception):
     pass
+
 
 def create_dataclass_inputs_from_env(schema):
     env = envparse.Env(**schema)
@@ -14,14 +24,18 @@ def create_dataclass_inputs_from_env(schema):
         result[key.lower()] = env(key)
     return result
 
+
 def is_jre_64_bit():
     java_support_dir = os.path.join(support_dir, 'java')
-    proc = subprocess.run(['java', '-classpath', java_support_dir, 'IsJre64Bit'],
+    proc = subprocess.run(
+        ['java', '-classpath', java_support_dir, 'IsJre64Bit'],
         capture_output=True, check=True, text=True)
     return proc.stdout.strip() == 'true'
 
+
 def is_windows_64_bit():
     return os.getenv('ProgramFiles(x86)') is not None
+
 
 def read_windows_registry_key(hive, key, subkey):
     flags = winreg.KEY_READ
@@ -38,14 +52,17 @@ def read_windows_registry_key(hive, key, subkey):
             else:
                 raise e
 
+
 def detect_venafi_client_tools_dir(user_provided_venafi_client_tools_dir):
     if user_provided_venafi_client_tools_dir is not None:
         return pathlib.Pathlib(user_provided_venafi_client_tools_dir)
     elif sys.platform.startswith('darwin'):
         return pathlib.Path('/Library/Venafi/CodeSigning')
     elif os.name == 'nt':
-        result = read_windows_registry_key(winreg.HKEY_LOCAL_MACHINE,
-            "Software\\Venafi\\Platform", "Client Base Path")
+        result = read_windows_registry_key(
+            winreg.HKEY_LOCAL_MACHINE,
+            "Software\\Venafi\\Platform",
+            'Client Base Path')
         if result is not None:
             return pathlib.Path(result)
 
@@ -55,6 +72,7 @@ def detect_venafi_client_tools_dir(user_provided_venafi_client_tools_dir):
         return pathlib.Path(program_files).joinpath('Venafi CodeSign Protect')
     else:
         return pathlib.Path('/opt/venafi/codesign')
+
 
 def get_pkcs11config_tool_path(user_provided_venafi_client_tools_dir):
     tools_dir = detect_venafi_client_tools_dir(user_provided_venafi_client_tools_dir)
@@ -71,6 +89,7 @@ def get_pkcs11config_tool_path(user_provided_venafi_client_tools_dir):
     else:
         return tools_dir.joinpath('bin').joinpath('pkcs11config')
 
+
 def get_pkcs11_driver_library_path(user_provided_venafi_client_tools_dir):
     tools_dir = detect_venafi_client_tools_dir(user_provided_venafi_client_tools_dir)
     if os.name == 'nt':
@@ -84,6 +103,7 @@ def get_pkcs11_driver_library_path(user_provided_venafi_client_tools_dir):
     else:
         return tools_dir.joinpath('lib').joinpath('venafipkcs11.so')
 
+
 def create_pkcs11_provider_config(path, user_provided_venafi_client_tools_dir):
     libpath = get_pkcs11_driver_library_path(user_provided_venafi_client_tools_dir)
     with open(path, 'w') as f:
@@ -94,6 +114,7 @@ def create_pkcs11_provider_config(path, user_provided_venafi_client_tools_dir):
             slot = 0,
             """ % (json.dumps(libpath),)
         ))
+
 
 def log_subprocess_run(logger, command, masks):
     if masks is None:
