@@ -1,4 +1,4 @@
-import setuptools, glob
+import setuptools
 
 setuptools.setup(
     name="example-pkg-YOUR-USERNAME-HERE",
