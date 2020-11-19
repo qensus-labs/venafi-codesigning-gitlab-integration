@@ -9,7 +9,6 @@ import os
 import glob
 import secrets
 import subprocess
-import traceback
 import random
 
 config_schema = dict(
@@ -144,9 +143,12 @@ class JarsignerSignCommand:
                     'LIBHSMINSTANCE': self.session_id
                 }
             )
+        except utils.AbortException:
+            # _invoke_command() already logged an error message.
+            pass
         except Exception:
             # Don't reraise exception: allow temp_dir to be cleaned up
-            traceback.print_exc()
+            logging.exception('Unexpected exception during TPP logout')
 
     def _invoke_jarsigner(self):
         env = {'LIBHSMINSTANCE': self.session_id}

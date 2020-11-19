@@ -55,7 +55,7 @@ def read_windows_registry_key(hive, key, subkey):
 
 def detect_venafi_client_tools_dir(user_provided_venafi_client_tools_dir):
     if user_provided_venafi_client_tools_dir is not None:
-        return pathlib.Pathlib(user_provided_venafi_client_tools_dir)
+        return pathlib.Path(user_provided_venafi_client_tools_dir)
     elif sys.platform.startswith('darwin'):
         return pathlib.Path('/Library/Venafi/CodeSigning')
     elif os.name == 'nt':
