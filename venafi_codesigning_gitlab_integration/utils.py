@@ -112,7 +112,7 @@ def create_pkcs11_provider_config(path, user_provided_venafi_client_tools_dir):
             name = VenafiPKCS11
             library = %s
             slot = 0,
-            """ % (json.dumps(libpath),)
+            """ % (json.dumps(str(libpath)),)
         ))
 
 
@@ -123,7 +123,8 @@ def log_subprocess_run(logger, command, masks):
         command_to_log = []
         for i, arg in enumerate(command):
             if masks[i]:
-                command_to_log.append(arg)
-            else:
                 command_to_log.append('***')
+            else:
+                command_to_log.append(arg)
+    command_to_log = list(map(lambda x: str(x), command_to_log))
     logger.info('Running: ' + shlex.join(command_to_log))

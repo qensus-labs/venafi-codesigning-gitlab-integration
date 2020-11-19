@@ -64,7 +64,7 @@ class JarsignerSignCommand:
             self._generate_session_id()
             self._create_pkcs11_provider_config()
             self._login_tpp()
-            self._invoke_jar_singer()
+            self._invoke_jarsigner()
         finally:
             self._logout_tpp()
             self._delete_temp_dir()
@@ -111,7 +111,7 @@ class JarsignerSignCommand:
                 '--password',
                 self.config.tpp_password
             ],
-            mask=[
+            masks=[
                 False,
                 False,
                 False,
@@ -121,7 +121,7 @@ class JarsignerSignCommand:
                 False,
                 True
             ],
-            envs={
+            env={
                 'LIBHSMINSTANCE': self.session_id
             }
         )
@@ -140,7 +140,7 @@ class JarsignerSignCommand:
                     '-force',
                     '-clear'
                 ],
-                envs={
+                env={
                     'LIBHSMINSTANCE': self.session_id
                 }
             )
@@ -149,7 +149,7 @@ class JarsignerSignCommand:
             traceback.print_exc()
 
     def _invoke_jarsigner(self):
-        envs = {'LIBHSMINSTANCE': self.session_id}
+        env = {'LIBHSMINSTANCE': self.session_id}
         for input_path in self.input_paths:
             command = [
                 'jarsigner',
@@ -183,7 +183,7 @@ class JarsignerSignCommand:
                 "Error signing '%s'" % (input_path,),
                 'jarsigner',
                 command=command,
-                envs=envs
+                env=env
             )
 
     def _invoke_command(self, pre_message, success_message, error_message, short_cmdline,
