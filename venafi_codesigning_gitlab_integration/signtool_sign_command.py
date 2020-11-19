@@ -46,22 +46,27 @@ class JarsignerSignConfig:
         return cls(utils.create_dataclass_inputs_from_env(config_schema))
 
 class SigntoolSignCommand:
-    def __init__(self, config: SigntoolSignConfig):
+    def __init__(self, logger, config: SigntoolSignConfig):
         if config.certificate_subject_name is not None and config.certificate_subject_sha1 is not None:
             raise envparse.ConfigurationError(
                 "Only one of 'CERTIFICATE_SUBJECT_NAME' or 'CERTIFICATE_SHA1' may be set, but not both")
 
+        self.logger = logger
         self.config = config
 
     def run(self):
-        with self._create_temp_dir():
-            try:
-                pass
-            finally:
-                pass
+        self._create_temp_dir()
+        try:
+            pass
+        finally:
+            self._delete_temp_dir()
 
     def _create_temp_dir(self):
-        return tempfile.TemporaryDirectory()
+        self.temp_dir = tempfile.TemporaryDirectory()
+
+    def _delete_temp_dir(self):
+        if hasattr(self, 'temp_dir'):
+            self.temp_dir.cleanup()
 
 
 def main():
@@ -71,7 +76,10 @@ def main():
     except envparse.ConfigurationError as e:
         print(e, file=sys.stderr)
         sys.exit(1)
-    command.run()
+    try:
+        command.run()
+    except utils.AbortException:
+        sys.exit(1)
 
 if __name__ == '__main__':
     main()

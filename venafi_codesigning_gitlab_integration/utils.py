@@ -4,6 +4,9 @@ if os.name == 'nt':
 
 support_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'support'))
 
+class AbortException(Exception):
+    pass
+
 def create_dataclass_inputs_from_env(schema):
     env = envparse.Env(**schema)
     result = {}
@@ -52,6 +55,21 @@ def detect_venafi_client_tools_dir(user_provided_venafi_client_tools_dir):
         return pathlib.Path(program_files).joinpath('Venafi CodeSign Protect')
     else:
         return pathlib.Path('/opt/venafi/codesign')
+
+def get_pkcs11config_tool_path(user_provided_venafi_client_tools_dir):
+    tools_dir = detect_venafi_client_tools_dir(user_provided_venafi_client_tools_dir)
+    if os.name == 'nt':
+        # The Venafi PKCS11 driver stores credentials in the Windows registry.
+        # 32-bit and 64-bit executables have access to different Windows registry hives,
+        # so we need to make sure that the architecture of pkcs11config.exe matches that
+        # of jarsigner.exe.
+        if is_jre_64_bit():
+            exe = 'PKCS11Config.exe'
+        else:
+            exe = 'PKCS11Config-x86.exe'
+        return tools_dir.join_path(exe)
+    else:
+        return tools_dir.joinpath('bin').joinpath('pkcs11config')
 
 def get_pkcs11_driver_library_path(user_provided_venafi_client_tools_dir):
     tools_dir = detect_venafi_client_tools_dir(user_provided_venafi_client_tools_dir)
