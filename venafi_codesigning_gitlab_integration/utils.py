@@ -116,6 +116,23 @@ def create_pkcs11_provider_config(path, user_provided_venafi_client_tools_dir):
         ))
 
 
+def get_cspconfig_tool_path(user_provided_venafi_client_tools_dir):
+    tools_dir = detect_venafi_client_tools_dir(user_provided_venafi_client_tools_dir)
+    if is_windows_64_bit():
+        exe = 'CSPConfig.exe'
+    else:
+        exe = 'CSPConfig-x86.exe'
+    return tools_dir.joinpath(exe)
+
+
+def get_signtool_path(user_provided_signtool_path):
+    if user_provided_signtool_path is not None:
+        return user_provided_signtool_path
+    else:
+        # Assume it's in PATH
+        return 'signtool'
+
+
 def log_subprocess_run(logger, command, masks):
     if masks is None:
         command_to_log = command
