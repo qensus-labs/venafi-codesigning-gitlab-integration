@@ -111,9 +111,9 @@ def create_pkcs11_provider_config(path, user_provided_venafi_client_tools_dir):
             """
             name = VenafiPKCS11
             library = %s
-            slot = 0,
+            slot = 0
             """ % (json.dumps(str(libpath)),)
-        ))
+        ).lstrip())
 
 
 def get_cspconfig_tool_path(user_provided_venafi_client_tools_dir):

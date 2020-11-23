@@ -39,7 +39,7 @@ def test_successful_signing_session(monkeypatch, caplog):
     assert 'Successfully obtained grant from TPP' in caplog.text
 
     jarsigner_line = (
-        r"jarsigner verbose -keystore NONE -storetype PKCS11 -storepass none "
+        r"jarsigner -verbose -keystore NONE -storetype PKCS11 -storepass none "
         r"-providerclass sun\.security\.pkcs11\.SunPKCS11 -providerArg .*/pkcs11-provider\.conf "
         r"-certs foo\.jar 'my cert'$"
     )
@@ -151,17 +151,17 @@ def test_input_glob(monkeypatch, caplog, tmpdir):
     command = JarsignerSignCommand(logging.getLogger(), config)
     command.run()
 
-    assert len(re.findall(r'jarsigner verbose', caplog.text)) == 2
+    assert len(re.findall(r'jarsigner -verbose', caplog.text)) == 2
 
     jarsigner_line = (
-        r"jarsigner verbose -keystore NONE -storetype PKCS11 -storepass none "
+        r"jarsigner -verbose -keystore NONE -storetype PKCS11 -storepass none "
         r"-providerclass sun\.security\.pkcs11\.SunPKCS11 -providerArg .*/pkcs11-provider\.conf "
         r"-certs %s 'my cert'$"
     ) % (a_jar_path,)
     assert re.search(jarsigner_line, caplog.text, re.MULTILINE)
 
     jarsigner_line = (
-        r"jarsigner verbose -keystore NONE -storetype PKCS11 -storepass none "
+        r"jarsigner -verbose -keystore NONE -storetype PKCS11 -storepass none "
         r"-providerclass sun\.security\.pkcs11\.SunPKCS11 -providerArg .*/pkcs11-provider\.conf "
         r"-certs %s 'my cert'$"
     ) % (b_jar_path,)
@@ -186,7 +186,7 @@ def test_timestamping_servers(monkeypatch, caplog):
     command.run()
 
     jarsigner_line = (
-        r"jarsigner verbose -keystore NONE -storetype PKCS11 -storepass none "
+        r"jarsigner -verbose -keystore NONE -storetype PKCS11 -storepass none "
         r"-providerclass sun\.security\.pkcs11\.SunPKCS11 -providerArg .*/pkcs11-provider\.conf "
         r"-certs -tsa timestamp1.com foo\.jar 'my cert'$"
     )
@@ -211,7 +211,7 @@ def test_extra_args(monkeypatch, caplog):
     command.run()
 
     jarsigner_line = (
-        r"jarsigner verbose -keystore NONE -storetype PKCS11 -storepass none "
+        r"jarsigner -verbose -keystore NONE -storetype PKCS11 -storepass none "
         r"-providerclass sun\.security\.pkcs11\.SunPKCS11 -providerArg .*/pkcs11-provider\.conf "
         r"-certs -aaaa -bbbb foo\.jar 'my cert'$"
     )

@@ -49,7 +49,7 @@ class SigntoolSignConfig:
 
     @classmethod
     def from_env(cls):
-        return cls(utils.create_dataclass_inputs_from_env(config_schema))
+        return cls(**utils.create_dataclass_inputs_from_env(config_schema))
 
 
 class SigntoolSignCommand:
@@ -59,6 +59,9 @@ class SigntoolSignCommand:
             raise envparse.ConfigurationError(
                 "Only one of 'CERTIFICATE_SUBJECT_NAME' or "
                 "'CERTIFICATE_SHA1' may be set, but not both")
+        if config.certificate_subject_name is None and config.certificate_sha1 is None:
+            raise envparse.ConfigurationError(
+                "One of 'CERTIFICATE_SUBJECT_NAME' or 'CERTIFICATE_SHA1' must be set.")
 
         self.logger = logger
         self.config = config

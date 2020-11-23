@@ -38,7 +38,7 @@ class JarsignerVerifyConfig:
 
     @classmethod
     def from_env(cls):
-        return cls(utils.create_dataclass_inputs_from_env(config_schema))
+        return cls(**utils.create_dataclass_inputs_from_env(config_schema))
 
 
 class JarsignerVerifyCommand:
@@ -46,6 +46,9 @@ class JarsignerVerifyCommand:
         if config.input_path is not None and config.input_glob is not None:
             raise envparse.ConfigurationError(
                 "Only one of 'INPUT_PATH' or 'INPUT_GLOB' may be set, but not both")
+        if config.input_path is None and config.input_glob is None:
+            raise envparse.ConfigurationError(
+                "One of 'INPUT_PATH' or 'INPUT_GLOB' must be set.")
 
         self.logger = logger
         self.config = config
