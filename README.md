@@ -56,7 +56,7 @@ This section shows how to sign one or more files with Java's [Jarsigner](https:/
 
  * Define a job that calls `venafi-sign-jarsigner`.
  * Ensure the job operates within the image `quay.io/fullstaq-venafi-codesigning-gitlab-integration/jarsigner-x86_64`.
- * Set the `INPUT_PATH` variable to the file that you wish to sign.
+ * Set the `INPUT_PATH` or `INPUT_GLOB` variable to the file(s) that you wish to sign.
  * Set other required variables too. See the variables reference below.
 
 ~~~yaml
@@ -99,7 +99,7 @@ sign_jarsigner:
 ### Shell or SSH executor
 
  * Define a job that calls `venafi-sign-jarsigner`.
- * Set the `INPUT_PATH` variable to the file that you wish to sign.
+ * Set the `INPUT_PATH` or `INPUT_GLOB` variable to the file(s) that you wish to sign.
  * Set other required variables too. See the variables reference below.
 
 ~~~yaml
@@ -176,6 +176,103 @@ Optional:
     ~~~
     EXTRA_ARGS: -arg1,-arg2
     ~~~
+
+ * `VENAFI_CLIENT_TOOLS_DIR`: Specifies the path to the directory in which Venafi CodeSign Protect client tools are installed. If not specified, it's autodetected as follows:
+
+     - Linux: /opt/venafi/codesign
+     - macOS: /Library/Venafi/CodeSigning
+     - Windows: autodetected from the registry, or (if that fails): C:\Program Files\Venafi CodeSign Protect
+
+### Verify with Jarsigner
+
+This section shows how to verify one or more files with Java's [Jarsigner](https://docs.oracle.com/javase/7/docs/technotes/tools/windows/jarsigner.html) tool. It assumes that jarsigner is in PATH.
+
+#### Docker executor
+
+ * Define a job that calls `venafi-verify-jarsigner`.
+ * Ensure the job operates within the image `quay.io/fullstaq-venafi-codesigning-gitlab-integration/jarsigner-x86_64`.
+ * Set the `INPUT_PATH` or `INPUT_GLOB` variable to the file(s) that you wish to verify.
+ * Set other required variables too. See the variables reference below.
+
+~~~yaml
+stages:
+  - fetch
+  - verify
+
+# Fetch a signed 'signed.jar' and pass it as an artifact to the 'verify' stage.
+fetch_jar:
+  stage: fetch
+  script:
+    - wget https://internal.lan/signed.jar
+  artifacts:
+    paths:
+      - signed.jar
+
+# Verify 'signed.jar' that was fetched by the 'fetched' stage.
+verify_jarsigner:
+  stage: verify
+  image:
+    name: quay.io/fullstaq-venafi-codesigning-gitlab-integration/jarsigner-x86_64
+  script:
+    - venafi-verify-jarsigner
+  variables:
+    TPP_AUTH_URL: https://my-tpp/vedauth
+    TPP_HSM_URL: https://my-tpp/vedhsm
+    TPP_USERNAME: my_username
+    # TPP_PASSWORD should be set in the UI, with masking enabled.
+
+    INPUT_PATH: signed.jar
+    CERTIFICATE_LABEL: my label
+~~~
+
+### Shell or SSH executor
+
+ * Define a job that calls `venafi-verify-jarsigner`.
+ * Set the `INPUT_PATH` or `INPUT_GLOB` variable to the file(s) that you wish to verify.
+ * Set other required variables too. See the variables reference below.
+ * *Note*: the host which performs the verification does not need to have pre-installed the certificate against which to verify. We'll will fetch the certificate from the TPP, which is why it requires a certificate label.
+
+~~~yaml
+stages:
+  - fetch
+  - verify
+
+# Fetch a signed 'signed.jar' and pass it as an artifact to the 'verify' stage.
+fetch_jar:
+  stage: fetch
+  script:
+    - wget https://internal.lan/signed.jar
+  artifacts:
+    paths:
+      - signed.jar
+
+# Verify 'signed.jar' that was fetched by the 'fetched' stage.
+verify_jarsigner:
+  stage: verify
+  script:
+    - venafi-verify-jarsigner
+  variables:
+    TPP_AUTH_URL: https://my-tpp/vedauth
+    TPP_HSM_URL: https://my-tpp/vedhsm
+    TPP_USERNAME: my_username
+    # TPP_PASSWORD should be set in the UI, with masking enabled.
+
+    INPUT_PATH: signed.jar
+    CERTIFICATE_LABEL: my label
+~~~
+
+### Variables
+
+Required:
+
+ * `TPP_AUTH_URL`: The TPP's authorization URL.
+ * `TPP_HSM_URL`: The TPP's Hardware Security Module (HSM) backend URL.
+ * `TPP_USERNAME`: A login username for the TPP.
+ * `TPP_PASSWORD`: The password associated with the login username.
+ * `INPUT_PATH` or `INPUT_GLOB`: Specifies the file(s) to verify, either through a single filename, or a glob.
+ * `CERTIFICATE_LABEL`: The label of the certificate (inside the TPP) that was used for signing the file(s). You can obtain a list of labels with `pkcs11config listcertificates`.
+
+Optional:
 
  * `VENAFI_CLIENT_TOOLS_DIR`: Specifies the path to the directory in which Venafi CodeSign Protect client tools are installed. If not specified, it's autodetected as follows:
 
