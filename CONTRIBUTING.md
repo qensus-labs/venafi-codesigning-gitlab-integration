@@ -4,7 +4,7 @@
 
 Requirements:
 
- * Python >= 3.8
+ * Python >= 3.7
 
 Install the development dependencies as follows:
 
