@@ -22,12 +22,12 @@ config_schema = dict(
     INPUT_GLOB=dict(cast=str, default=None),
     TIMESTAMPING_SERVERS=dict(cast=list, subcast=str, default=()),
 
-    EXTRA_CLI_ARGS=dict(cast=list, subcast=str, default=()),
+    EXTRA_ARGS=dict(cast=list, subcast=str, default=()),
     VENAFI_CLIENT_TOOLS_DIR=dict(cast=str, default=None),
 )
 
 
-@dataclass
+@dataclass(frozen=True)
 class JarsignerSignConfig:
     tpp_auth_url: str
     tpp_hsm_url: str
@@ -39,7 +39,7 @@ class JarsignerSignConfig:
     input_glob: str = None
     timestamping_servers: List[str] = ()
 
-    extra_cli_args: List[str] = ()
+    extra_args: List[str] = ()
     venafi_client_tools_dir: str = None
 
     @classmethod
@@ -174,7 +174,7 @@ class JarsignerSignCommand:
                 command.append(random.choice(
                     self.config.timestamping_servers))
 
-            command += self.config.extra_cli_args
+            command += self.config.extra_args
 
             command.append(input_path)
             command.append(self.config.certificate_label)

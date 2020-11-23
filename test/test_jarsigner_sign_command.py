@@ -193,13 +193,13 @@ def test_timestamping_servers(monkeypatch, caplog):
     assert re.search(jarsigner_line, caplog.text, re.MULTILINE)
 
 
-def test_extra_cli_args(monkeypatch, caplog):
+def test_extra_args(monkeypatch, caplog):
     caplog.set_level(logging.INFO)
 
     config = JarsignerSignConfig(
         certificate_label='my cert',
         input_path='foo.jar',
-        extra_cli_args=['-aaaa', '-bbbb'],
+        extra_args=['-aaaa', '-bbbb'],
         **fake_tpp_config
     )
 

@@ -26,7 +26,7 @@ config_schema = dict(
 )
 
 
-@dataclass
+@dataclass(frozen=True)
 class SigntoolSignConfig:
     tpp_auth_url: str
     tpp_hsm_url: str
