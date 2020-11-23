@@ -43,14 +43,16 @@ def read_windows_registry_key(hive, key, subkey):
         flags |= winreg.KEY_WOW64_64KEY
     else:
         flags |= winreg.KEY_WOW64_32KEY
-    with winreg.OpenKey(hive, key, 0, flags) as key:
-        try:
-            return winreg.QueryValueEx(subkey)
-        except OSError as e:
-            if e.errno == errno.ENOENT:
-                return None
-            else:
-                raise e
+    try:
+        with winreg.OpenKey(hive, key, 0, flags) as key:
+            return winreg.QueryValueEx(key, subkey)[0]
+    except FileNotFoundError:
+        return None
+    except OSError as e:
+        if e.errno == errno.ENOENT:
+            return None
+        else:
+            raise e
 
 
 def detect_venafi_client_tools_dir(user_provided_venafi_client_tools_dir):
