@@ -8,7 +8,6 @@ import sys
 import os
 import glob
 import secrets
-import random
 
 config_schema = dict(
     TPP_AUTH_URL=str,
@@ -19,15 +18,13 @@ config_schema = dict(
     CERTIFICATE_LABEL=str,
     INPUT_PATH=dict(cast=str, default=None),
     INPUT_GLOB=dict(cast=str, default=None),
-    TIMESTAMPING_SERVERS=dict(cast=list, subcast=str, default=()),
 
-    EXTRA_ARGS=dict(cast=list, subcast=str, default=()),
     VENAFI_CLIENT_TOOLS_DIR=dict(cast=str, default=None),
 )
 
 
 @dataclass(frozen=True)
-class JarsignerSignConfig:
+class JarsignerVerifyConfig:
     tpp_auth_url: str
     tpp_hsm_url: str
     tpp_username: str
@@ -36,9 +33,7 @@ class JarsignerSignConfig:
     certificate_label: str
     input_path: str = None
     input_glob: str = None
-    timestamping_servers: List[str] = ()
 
-    extra_args: List[str] = ()
     venafi_client_tools_dir: str = None
 
     @classmethod
@@ -46,8 +41,8 @@ class JarsignerSignConfig:
         return cls(utils.create_dataclass_inputs_from_env(config_schema))
 
 
-class JarsignerSignCommand:
-    def __init__(self, logger, config: JarsignerSignConfig):
+class JarsignerVerifyCommand:
+    def __init__(self, logger, config: JarsignerVerifyConfig):
         if config.input_path is not None and config.input_glob is not None:
             raise envparse.ConfigurationError(
                 "Only one of 'INPUT_PATH' or 'INPUT_GLOB' may be set, but not both")
@@ -60,9 +55,10 @@ class JarsignerSignCommand:
         try:
             self._determine_input_paths()
             self._generate_session_id()
-            self._create_pkcs11_provider_config()
             self._login_tpp()
-            self._invoke_jarsigner()
+            self._get_certificates()
+            self._import_certificates()
+            self._invoke_jarsigner_verify()
         finally:
             self._logout_tpp()
             self._delete_temp_dir()
@@ -80,17 +76,18 @@ class JarsignerSignCommand:
         else:
             self.input_paths = glob.glob(self.config.input_glob)
 
+    def _get_cert_file_path(self):
+        return os.path.join(self.temp_dir.name, 'cert.crt')
+
+    def _get_chain_file_path(self):
+        return os.path.join(self.temp_dir.name, 'chain.crt')
+
+    def _get_keystore_file_path(self):
+        return os.path.join(self.temp_dir.name, 'keystore')
+
     def _generate_session_id(self):
         self.session_id = secrets.token_urlsafe(18)
         self.logger.info('Session ID: %s' % (self.session_id,))
-
-    def _create_pkcs11_provider_config(self):
-        utils.create_pkcs11_provider_config(
-            self._pkcs11_provider_config_path(),
-            self.config.venafi_client_tools_dir)
-
-    def _pkcs11_provider_config_path(self) -> str:
-        return os.path.join(self.temp_dir.name, 'pkcs11-provider.conf')
 
     def _login_tpp(self):
         utils.invoke_command(
@@ -153,52 +150,106 @@ class JarsignerSignCommand:
             # Don't reraise exception: allow temp_dir to be cleaned up
             logging.exception('Unexpected exception during TPP logout')
 
-    def _invoke_jarsigner(self):
-        env = {'LIBHSMINSTANCE': self.session_id}
-        for input_path in self.input_paths:
-            command = [
-                'jarsigner',
-                'verbose',
-                '-keystore',
-                'NONE',
-                '-storetype',
-                'PKCS11',
-                '-storepass',
-                'none',
-                '-providerclass',
-                'sun.security.pkcs11.SunPKCS11',
-                '-providerArg',
-                self._pkcs11_provider_config_path(),
-                '-certs'
+    def _get_certificates(self):
+        utils.invoke_command(
+            self.logger,
+            'Getting certificate chain from TPP.',
+            'Successfully obtained certificate chain from TPP.',
+            'Error obtaining certificate chain from TPP',
+            'pkcs11config getcertificate',
+            print_output_on_success=False,
+            command=[
+                utils.get_pkcs11config_tool_path(
+                    self.config.venafi_client_tools_dir),
+                'getcertificate',
+                '--label=' + self.config.certificate_label,
+                '--file=' + self._get_cert_file_path(),
+                '--chainfile=' + self._get_chain_file_path()
+            ],
+            env={
+                'LIBHSMINSTANCE': self.session_id
+            }
+        )
+
+    def _import_certificates(self):
+        utils.invoke_command(
+            self.logger,
+            'Importing main certificate into temporary Java key store.',
+            'Successfully imported main certificate into temporary Java key store.',
+            'Error importing main certificate into temporary Java key store',
+            'keytool -import',
+            print_output_on_success=False,
+            command=[
+                'keytool',
+                '-import',
+                '-trustcacerts',
+                '-file', self._get_cert_file_path(),
+                '-alias', self._get_cert_file_path(),
+                '-keystore', self._get_keystore_file_path(),
+                '--storepass', 'notrelevant',
+                '--noprompt'
             ]
+        )
 
-            if len(self.config.timestamping_servers) > 0:
-                command.append('-tsa')
-                command.append(random.choice(
-                    self.config.timestamping_servers))
-
-            command += self.config.extra_args
-
-            command.append(input_path)
-            command.append(self.config.certificate_label)
+        with open(self._get_chain_file_path(), 'r', encoding='UTF-8') as f:
+            chain_parts = utils.split_cert_chain(f.read())
+        for i, chain_part in enumerate(chain_parts):
+            chain_part_file_path = os.path.join(self.temp_dir.name, "chain.%d.crt" % (i,))
+            with open(chain_part_file_path, 'w', encoding='UTF-8') as f:
+                f.write(chain_part)
 
             utils.invoke_command(
                 self.logger,
-                'Signing with jarsigner: %s' % (input_path,),
-                "Successfully signed '%s'." % (input_path,),
-                "Error signing '%s'" % (input_path,),
-                'jarsigner',
+                'Importing certificate chain [part %d] into temporary Java key store.' % (i,),
+                'Successfully imported certificate chain [part %d] into temporary Java key store.' % (i,),  # noqa:E501
+                'Error importing certificate chain [part %d] into temporary Java key store' % (i,),
+                'keytool -import',
                 print_output_on_success=False,
-                command=command,
-                env=env
+                command=[
+                    'keytool',
+                    '-import',
+                    '-trustcacerts',
+                    '-file', chain_part_file_path,
+                    '-alias', chain_part_file_path,
+                    '-keystore', self._get_keystore_file_path(),
+                    '--storepass', 'notrelevant',
+                    '--noprompt'
+                ]
             )
+
+    def _invoke_jarsigner_verify(self):
+        for input_path in self.input_paths:
+            output = utils.invoke_command(
+                self.logger,
+                'Verifying with jarsigner: %s' % (input_path,),
+                None,
+                "Error verifying '%s'" % (input_path,),
+                'jarsigner -verify',
+                print_output_on_success=True,
+                command=[
+                    'jarsigner',
+                    '-verify',
+                    '-verbose',
+                    '-keystore', self._get_keystore_file_path(),
+                    input_path,
+                ]
+            )
+
+            if 'jar is unsigned' not in output:
+                self.logger.info("Successfully verified '%s'." % (input_path,))
+            else:
+                self.logger.error(
+                    "Verification of '%s' failed: file is unsigned" %
+                    (input_path,)
+                )
+                raise utils.AbortException()
 
 
 def main():
     try:
         logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)-8s %(message)s')
-        config = JarsignerSignConfig.from_env()
-        command = JarsignerSignCommand(logging.getLogger(), config)
+        config = JarsignerVerifyConfig.from_env()
+        command = JarsignerVerifyCommand(logging.getLogger(), config)
     except envparse.ConfigurationError as e:
         print(e, file=sys.stderr)
         sys.exit(1)

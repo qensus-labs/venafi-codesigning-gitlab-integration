@@ -106,7 +106,7 @@ def get_pkcs11_driver_library_path(user_provided_venafi_client_tools_dir):
 
 def create_pkcs11_provider_config(path, user_provided_venafi_client_tools_dir):
     libpath = get_pkcs11_driver_library_path(user_provided_venafi_client_tools_dir)
-    with open(path, 'w') as f:
+    with open(path, 'w', encoding='UTF-8') as f:
         f.write(textwrap.dedent(
             """
             name = VenafiPKCS11
@@ -128,3 +128,37 @@ def log_subprocess_run(logger, command, masks):
                 command_to_log.append(arg)
     command_to_log = list(map(lambda x: str(x), command_to_log))
     logger.info('Running: ' + shlex.join(command_to_log))
+
+
+def split_cert_chain(chain_cert_data):
+    lines = chain_cert_data.splitlines()
+    result = []
+    current_cert = []
+
+    for line in filter(lambda x: len(x) > 0, lines):
+        current_cert.append(line)
+        current_cert.append("\n")
+
+        if '-END CERTIFICATE-' in line:
+            result.append(''.join(current_cert))
+            current_cert.clear()
+
+    return result
+
+
+def invoke_command(logger, pre_message, success_message, error_message, short_cmdline,
+                   print_output_on_success, command, masks=None, env=None):
+    logger.info(pre_message)
+    log_subprocess_run(logger, command, masks)
+    proc = subprocess.run(command, capture_output=True, text=True, env=env)
+    if proc.returncode == 0:
+        if print_output_on_success:
+            logger.info(proc.stdout)
+        if success_message is not None:
+            logger.info(success_message)
+        return proc.stdout
+    else:
+        logger.info(
+            "%s: command exited with code %d. Output from command '%s' is as follows:\n%s",
+            error_message, proc.returncode, short_cmdline, proc.stdout)
+        raise AbortException()

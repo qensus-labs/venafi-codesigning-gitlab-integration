@@ -36,7 +36,7 @@ def test_successful_signing_session(monkeypatch, caplog):
         r"--username=user --password '\*\*\*'$"
     )
     assert re.search(getgrant_line, caplog.text, re.MULTILINE)
-    assert 'Successfully obtained grant from TP' in caplog.text
+    assert 'Successfully obtained grant from TPP' in caplog.text
 
     jarsigner_line = (
         r"jarsigner verbose -keystore NONE -storetype PKCS11 -storepass none "
