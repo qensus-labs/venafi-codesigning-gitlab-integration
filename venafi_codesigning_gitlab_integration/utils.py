@@ -167,6 +167,8 @@ def split_cert_chain(chain_cert_data):
 
 def invoke_command(logger, pre_message, success_message, error_message, short_cmdline,
                    print_output_on_success, command, masks=None, env=None):
+    if env is not None:
+        env = {**os.environ, **env}
     logger.info(pre_message)
     log_subprocess_run(logger, command, masks)
     proc = subprocess.run(command, capture_output=True, text=True, env=env)
