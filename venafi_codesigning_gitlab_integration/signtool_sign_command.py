@@ -19,7 +19,7 @@ config_schema = dict(
     CERTIFICATE_SHA1=dict(cast=str, default=None),
     TIMESTAMPING_SERVERS=dict(cast=list, subcast=str, default=()),
 
-    SIGNATURE_DIGEST_ALGOS=dict(cast=list, subcast=str, default=('sha256')),
+    SIGNATURE_DIGEST_ALGOS=dict(cast=list, subcast=str, default=('sha256',)),
     APPEND_SIGNATURES=dict(cast=bool, default=False),
     EXTRA_ARGS=dict(cast=list, subcast=str, default=()),
     SIGNTOOL_PATH=dict(cast=str, default=None),
