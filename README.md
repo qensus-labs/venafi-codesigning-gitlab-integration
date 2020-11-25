@@ -299,7 +299,7 @@ This section shows how to sign one or more files with Microsoft's [Signtool](htt
 
 #### Docker executor
 
- * Define a job that calls `venafi-sign-jarsigner`.
+ * Define a job that calls `venafi-sign-signtool`.
  * Ensure the job operates within the image `quay.io/fullstaq-venafi-codesigning-gitlab-integration/signtool-x86_64`.
  * Set the `INPUT` variable to a filename or a glob that you wish to sign.
  * Set other required variables too. See the variables reference below.
@@ -341,7 +341,7 @@ sign_signtool:
 
 ### Shell or SSH executor
 
- * Define a job that calls `venafi-sign-jarsigner`.
+ * Define a job that calls `venafi-sign-signtool`.
  * Set the `INPUT` variable to a filename or a glob that you wish to sign.
  * Set other required variables too. See the variables reference below.
  * _Note_: We assume that signtool.exe is in PATH, unless you explicitly specify its path with `SIGNTOOL_PATH`.
