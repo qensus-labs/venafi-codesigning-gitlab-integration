@@ -303,6 +303,7 @@ This section shows how to sign one or more files with Microsoft's [Signtool](htt
  * Ensure the job operates within the image `quay.io/fullstaq-venafi-codesigning-gitlab-integration/signtool-x86_64`.
  * Set the `INPUT` variable to a filename or a glob that you wish to sign.
  * Set other required variables too. See the variables reference below.
+ * Our image uses x64 signtool by default. If you wish to use a different architecture's signtool, then set `SIGNTOOL_PATH` to `C:\winsdk\<arch>\signtool`.
 
 ~~~yaml
 stages:

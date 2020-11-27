@@ -1,4 +1,7 @@
-import setuptools
+import setuptools, os
+
+with open('README.md', 'r', encoding='UTF-8') as f:
+    long_description = f.read()
 
 setuptools.setup(
     name='venafi-codesigning-gitlab-integration',
@@ -6,7 +9,7 @@ setuptools.setup(
     author='Fullstaq',
     author_email='info@fullstaq.com',
     description='Venafi CodeSign Protect: Gitlab integration',
-    long_description=read('README.md'),
+    long_description=long_description,
     long_description_content_type='text/markdown',
     url="https://github.com/fullstaq-labs/venafi-codesigning-gitlab-integration",
     platforms='any',

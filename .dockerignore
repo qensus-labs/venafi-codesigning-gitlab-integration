@@ -1,17 +1,16 @@
 *.pyc
 *.class
 *.egg-info
-*.md
-*.in
-*.txt
 
 .editorconfig
+.git
 .gitignore
 .flake8
 .DS_Store
 .pytest_cache
 __pycache__
 
+/bin
 /build
 /dist
 /venv
