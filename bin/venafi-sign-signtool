@@ -1,3 +1,0 @@
-#!/bin/sh
-set -e
-exec python3 -mvenafi_codesigning_gitlab_integration.signtool_sign_command "$@"
