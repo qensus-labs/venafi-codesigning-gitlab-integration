@@ -24,7 +24,7 @@ setuptools.setup(
         ]
     },
     install_requires=[
-        'envparse==0.2.0'
+        'envparse>=0.2.0,<0.3'
     ],
     classifiers=[
         'Programming Language :: Python :: 3',
