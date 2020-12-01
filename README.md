@@ -27,6 +27,7 @@ This product allows one to sign and verify files through Venafi CodeSign Protect
      - [Docker executor](#docker-executor-2)
      - [Shell or SSH executor](#shell-or-ssh-executor-2)
      - [Variables](#variables-2)
+ - [Signtool caveats](#signtool-caveats)
  - [Contribution & development](#contribution-development)
 
 ## Usage overview
@@ -295,7 +296,10 @@ Optional:
 
 This section shows how to sign one or more files with Microsoft's [Signtool](https://docs.microsoft.com/en-us/dotnet/framework/tools/signtool-exe) tool.
 
-*Important note*: we use 'sha256' as the default signature digest algorithm, unlike Signtool's default ('sha1'). You may want to override this if you care about compatibility with older Windows versions that didn't support SHA-256.
+*Important notes*:
+
+ - We use 'sha256' as the default signature digest algorithm, unlike Signtool's default ('sha1'). You may want to override this if you care about compatibility with older Windows versions that didn't support SHA-256.
+ - Please read the [Signtool caveats](#signtool-caveats).
 
 #### Docker executor
 
@@ -448,6 +452,14 @@ Optional:
  * `VENAFI_CLIENT_TOOLS_DIR`: Specifies the path to the directory in which Venafi CodeSign Protect client tools are installed. If not specified, it's autodetected from the registry. If that fails, we fallback to C:\Program Files\Venafi CodeSign Protect.
 
  * `MACHINE_CONFIGURATION` (boolean): Whether to load CSP configuration from the machine registry hive instead of the user registry hive. Defaults to false.
+
+## Signtool caveats
+
+When using Signtool, you must ensure that all your TPP environments disable the option "Include Certificate Chain". You must do this for *all* TPP environments: not just the ones to be used together with Signtool.
+
+If you do not do this, then Signtool will trigger a confirmation dialog box, in which Windows asks for approval to import root certificates. Signtool can't continue until a human manually clicks "Yes".
+
+This is especially problematic when using Signtool in a container, because there is no user interface, so it's impossible to click on anything.
 
 ## Contribution & development
 
