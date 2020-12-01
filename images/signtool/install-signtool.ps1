@@ -13,6 +13,6 @@ if ($proc.ExitCode -ne 0) {
 
 New-Item -ItemType SymbolicLink -Path \winsdk `
     -Target "${env:ProgramFiles(x86)}\Windows` Kits\10\bin\10.0.19041.0"
-setx /M PATH "${env:PATH};C:\winsdk"
+setx /M PATH "${env:PATH};C:\winsdk\x64"
 
 Remove-Item -Force \winsdksetup*
