@@ -243,6 +243,7 @@ def main():
         print(e, file=sys.stderr)
         sys.exit(1)
     try:
+        utils.maybe_add_entry_to_hosts_file(logging.getLogger())
         command.run()
     except utils.AbortException:
         sys.exit(1)

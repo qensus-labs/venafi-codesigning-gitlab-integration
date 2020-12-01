@@ -5,6 +5,7 @@ FROM mcr.microsoft.com/windows/servercore:ltsc2019
 # Install Signtool
 ADD images\signtool\install-signtool.ps1 \build\
 RUN powershell \build\install-signtool.ps1
+ENV SIGNTOOL_PATH=C:\winsdk\x64\signtool.exe
 
 # Install Python
 ADD requirements-dist-build.txt \build\

@@ -8,3 +8,5 @@ if ($proc.ExitCode -ne 0) {
     Get-Content \build\venafi-install.log
     exit 1
 }
+
+setx /M PATH "${env:PATH};${env:ProgramFiles}\Venafi CodeSign Protect"

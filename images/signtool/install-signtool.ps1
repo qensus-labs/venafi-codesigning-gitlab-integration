@@ -15,4 +15,4 @@ New-Item -ItemType SymbolicLink -Path \winsdk `
     -Target "${env:ProgramFiles(x86)}\Windows` Kits\10\bin\10.0.19041.0"
 setx /M PATH "${env:PATH};C:\winsdk"
 
-Remove-Item -Force \winsdksetup.*
+Remove-Item -Force \winsdksetup*
