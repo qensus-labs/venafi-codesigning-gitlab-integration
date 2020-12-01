@@ -17,6 +17,14 @@ ADD VenafiCodeSigningClients-x64.msi \build\
 ADD images\signtool\install-venafi-client-tools.ps1 \build\
 RUN powershell \build\install-venafi-client-tools.ps1
 
+# With VENAFICSPSilent, when an error occurs at the Venafi CSP driver level,
+# that error is printed as part of the console output, instead of shown
+# in a dialog box that requires the user to click OK.
+ENV VENAFICSPSilent=1
+ENV VENAFI_CONTAINER=true
+ENV VENAFI_CONTAINER_REGISTER_CSP_DLL=true
+ENTRYPOINT ["venafi-container-init"]
+
 # Install Gitlab integration
 ADD . \build
 ADD images\signtool\install-gitlab-integration.ps1 \build\

@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import List
+from venafi_codesigning_gitlab_integration import container_init_command
 from venafi_codesigning_gitlab_integration import utils
 import envparse
 import tempfile
@@ -243,7 +244,7 @@ def main():
         print(e, file=sys.stderr)
         sys.exit(1)
     try:
-        utils.maybe_add_entry_to_hosts_file(logging.getLogger())
+        container_init_command.init_container_environment(logging.getLogger())
         command.run()
     except utils.AbortException:
         sys.exit(1)

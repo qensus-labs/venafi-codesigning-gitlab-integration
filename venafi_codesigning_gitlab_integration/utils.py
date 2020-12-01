@@ -183,19 +183,3 @@ def invoke_command(logger, pre_message, success_message, error_message, short_cm
             "%s: command exited with code %d. Output from command '%s' is as follows:\n%s",
             error_message, proc.returncode, short_cmdline, proc.stdout)
         raise AbortException()
-
-
-# Used by Windows tests to add an entry to the hosts file,
-# in order to be able to reach our test TPP.
-def maybe_add_entry_to_hosts_file(logger):
-    entry = os.getenv('CONTAINER_ADD_HOST')
-    if entry is None:
-        return
-
-    logger.info('Adding %s to hosts file' % (entry,))
-    hosts_file_path = os.path.join(os.getenv('SystemRoot'), 'system32',
-        'drivers', 'etc', 'hosts')
-    with open(hosts_file_path, 'a') as f:
-        f.write("\n")
-        f.write(entry)
-        f.write("\n")

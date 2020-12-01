@@ -18,6 +18,7 @@ setuptools.setup(
     include_package_data=True,
     entry_points={
         'console_scripts': [
+            'venafi-container-init=venafi_codesigning_gitlab_integration.container_init_command:main',
             'venafi-sign-jarsigner=venafi_codesigning_gitlab_integration.jarsigner_sign_command:main',
             'venafi-sign-signtool=venafi_codesigning_gitlab_integration.signtool_sign_command:main',
         ]
