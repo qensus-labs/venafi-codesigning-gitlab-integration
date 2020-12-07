@@ -1,0 +1,1 @@
+python -mvenafi_codesigning_gitlab_integration.signtool_verify_command %*

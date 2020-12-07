@@ -22,6 +22,7 @@ setuptools.setup(
             'venafi-sign-jarsigner=venafi_codesigning_gitlab_integration.jarsigner_sign_command:main',
             'venafi-verify-jarsigner=venafi_codesigning_gitlab_integration.jarsigner_verify_command:main',
             'venafi-sign-signtool=venafi_codesigning_gitlab_integration.signtool_sign_command:main',
+            'venafi-verify-signtool=venafi_codesigning_gitlab_integration.signtool_verify_command:main',
         ]
     },
     install_requires=[
