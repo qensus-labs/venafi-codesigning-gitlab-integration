@@ -282,7 +282,7 @@ def test_signtool_path(monkeypatch, caplog):
 
     config = SigntoolSignConfig(
         certificate_subject_name='my cert',
-        input='foo.jar',
+        input='foo.exe',
         signtool_path='C:\\Windows SDK\\bin\\signtool.exe',
         **fake_tpp_config
     )
