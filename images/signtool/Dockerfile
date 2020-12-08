@@ -22,6 +22,7 @@ RUN powershell \build\install-venafi-client-tools.ps1
 ENV VENAFICSPSilent=1
 ENV VENAFI_CONTAINER=true
 ENV VENAFI_CONTAINER_REGISTER_CSP_DLL=true
+ENV ISOLATE_SESSIONS=false
 ENTRYPOINT ["venafi-container-init"]
 
 # Install Gitlab integration

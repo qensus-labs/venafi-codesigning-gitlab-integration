@@ -25,6 +25,7 @@ config_schema = dict(
     EXTRA_ARGS=dict(cast=list, subcast=str, default=()),
     SIGNTOOL_PATH=dict(cast=str, default=None),
     VENAFI_CLIENT_TOOLS_DIR=dict(cast=str, default=None),
+    ISOLATE_SESSIONS=dict(cast=bool, default=False),
     MACHINE_CONFIGURATION=dict(cast=bool, default=False),
 )
 
@@ -46,6 +47,7 @@ class SigntoolSignConfig:
     extra_args: List[str] = ()
     signtool_path: str = None
     venafi_client_tools_dir: str = None
+    isolate_sessions: bool = False
     machine_configuration: bool = False
 
     @classmethod
@@ -86,8 +88,11 @@ class SigntoolSignCommand:
             self.temp_dir.cleanup()
 
     def _generate_session_id(self):
-        self.session_id = secrets.token_urlsafe(18)
-        self.logger.info('Session ID: %s' % (self.session_id,))
+        if self.config.isolate_sessions:
+            self.session_env = {}
+        else:
+            self.session_env = {'LIBHSMINSTANCE': secrets.token_urlsafe(18)}
+            self.logger.info('Session ID: %s' % (self.session_id,))
 
     def _login_tpp(self):
         command = [
@@ -123,9 +128,7 @@ class SigntoolSignCommand:
             print_output_on_success=False,
             command=command,
             masks=masks,
-            env={
-                'LIBHSMINSTANCE': self.session_id
-            }
+            env=self.session_env
         )
 
     def _logout_tpp(self):
@@ -148,9 +151,7 @@ class SigntoolSignCommand:
                 'cspconfig revokegrant',
                 print_output_on_success=False,
                 command=command,
-                env={
-                    'LIBHSMINSTANCE': self.session_id
-                }
+                env=self.session_env
             )
         except utils.AbortException:
             # utils.invoke_command() already logged an error message.
@@ -176,9 +177,7 @@ class SigntoolSignCommand:
             'cspconfig sync',
             print_output_on_success=False,
             command=command,
-            env={
-                'LIBHSMINSTANCE': self.session_id
-            }
+            env=self.session_env
         )
 
     def _invoke_signtool(self):
@@ -187,7 +186,10 @@ class SigntoolSignCommand:
         # With VENAFICSPSilent, when an error occurs at the Venafi CSP driver level,
         # that error is printed as part of the console output, instead of shown
         # in a dialog box that requires the user to click OK.
-        env = {'VENAFICSPSilent': '1', 'LIBHSMINSTANCE': self.session_id}
+        env = {
+            'VENAFICSPSilent': '1',
+            **self.session_env
+        }
 
         for i, signature_digest_algo in enumerate(self.config.signature_digest_algos):
             should_append_signature = self.config.append_signatures or i > 0

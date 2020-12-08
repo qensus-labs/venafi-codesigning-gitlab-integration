@@ -18,6 +18,7 @@ config_schema = dict(
 
     SIGNTOOL_PATH=dict(cast=str, default=None),
     VENAFI_CLIENT_TOOLS_DIR=dict(cast=str, default=None),
+    ISOLATE_SESSIONS=dict(cast=bool, default=False),
     MACHINE_CONFIGURATION=dict(cast=bool, default=False),
 )
 
@@ -33,6 +34,7 @@ class SigntoolVerifyConfig:
 
     signtool_path: str = None
     venafi_client_tools_dir: str = None
+    isolate_sessions: bool = False
     machine_configuration: bool = False
 
     @classmethod
@@ -55,8 +57,11 @@ class SigntoolVerifyCommand:
             self._logout_tpp()
 
     def _generate_session_id(self):
-        self.session_id = secrets.token_urlsafe(18)
-        self.logger.info('Session ID: %s' % (self.session_id,))
+        if self.config.isolate_sessions:
+            self.session_env = {}
+        else:
+            self.session_env = {'LIBHSMINSTANCE': secrets.token_urlsafe(18)}
+            self.logger.info('Session ID: %s' % (self.session_id,))
 
     def _login_tpp(self):
         command = [
@@ -92,9 +97,7 @@ class SigntoolVerifyCommand:
             print_output_on_success=False,
             command=command,
             masks=masks,
-            env={
-                'LIBHSMINSTANCE': self.session_id
-            }
+            env=self.session_env
         )
 
     def _logout_tpp(self):
@@ -117,9 +120,7 @@ class SigntoolVerifyCommand:
                 'cspconfig revokegrant',
                 print_output_on_success=False,
                 command=command,
-                env={
-                    'LIBHSMINSTANCE': self.session_id
-                }
+                env=self.session_env
             )
         except utils.AbortException:
             # utils.invoke_command() already logged an error message.
@@ -146,9 +147,7 @@ class SigntoolVerifyCommand:
             'cspconfig sync',
             print_output_on_success=False,
             command=command,
-            env={
-                'LIBHSMINSTANCE': self.session_id
-            }
+            env=self.session_env
         )
 
     def _invoke_signtool_verify(self):
@@ -172,7 +171,7 @@ class SigntoolVerifyCommand:
                 # that error is printed as part of the console output, instead of shown
                 # in a dialog box that requires the user to click OK.
                 'VENAFICSPSilent': '1',
-                'LIBHSMINSTANCE': self.session_id
+                **self.session_env
             })
 
 
