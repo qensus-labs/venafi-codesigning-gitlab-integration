@@ -12,7 +12,7 @@ if ($proc.ExitCode -ne 0) {
 }
 
 $proc = Start-Process -Wait -NoNewWindow -PassThru C:\Python\Scripts\pip `
-    -ArgumentList ('install','-r','\build\requirements-dist-build.txt')
+    -ArgumentList ('install','-U','-r','\build\requirements-dist-build.txt')
 if ($proc.ExitCode -ne 0) {
     exit 1
 }
