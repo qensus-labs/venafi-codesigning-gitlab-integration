@@ -42,6 +42,7 @@ def maybe_enable_csp_debugging(logger):
     if os.name != 'nt' or os.getenv('VENAFI_CONTAINER_DEBUG_CSP') != 'true':
         return
 
+    logger.info('Enabling Venafi CSP debugging messages')
     subprocess.run(
         ['cspconfig', 'trace', 'console', 'enable', 'out', 'stdout'],
         check=True
