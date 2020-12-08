@@ -13,8 +13,3 @@ $proc = Start-Process -Wait -NoNewWindow -PassThru pip -ArgumentList ('install',
 if ($proc.ExitCode -ne 0) {
     exit 1
 }
-
-$proc = Start-Process -Wait -NoNewWindow -PassThru python -ArgumentList 'setup.py clean -a'
-if ($proc.ExitCode -ne 0) {
-    exit 1
-}
