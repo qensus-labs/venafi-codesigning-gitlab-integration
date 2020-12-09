@@ -89,10 +89,11 @@ class SigntoolSignCommand:
 
     def _generate_session_id(self):
         if self.config.isolate_sessions:
-            self.session_env = {}
+            session_id = secrets.token_urlsafe(18)
+            self.session_env = {'LIBHSMINSTANCE': session_id}
+            self.logger.info(f'Session ID: {session_id}')
         else:
-            self.session_env = {'LIBHSMINSTANCE': secrets.token_urlsafe(18)}
-            self.logger.info('Session ID: %s' % (self.session_id,))
+            self.session_env = {}
 
     def _login_tpp(self):
         command = [
@@ -132,6 +133,9 @@ class SigntoolSignCommand:
         )
 
     def _logout_tpp(self):
+        if not self.config.isolate_sessions:
+            return
+
         try:
             command = [
                 utils.get_cspconfig_tool_path(
