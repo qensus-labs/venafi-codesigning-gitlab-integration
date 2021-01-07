@@ -455,7 +455,7 @@ Optional:
 
 ## Signtool caveats
 
-When using Signtool, you must ensure that all your TPP environments disable the option "Include Certificate Chain". You must do this for *all* TPP environments: not just the ones to be used together with Signtool.
+When using Signtool, you must ensure that all your TPP environments disable the option "Include Certificate Chain". You must do this for *all* TPP environments that the authenticated user account has access to: not just the ones to be used together with Signtool.
 
 If you do not do this, then Signtool will trigger a confirmation dialog box, in which Windows asks for approval to import root certificates. Signtool can't continue until a human manually clicks "Yes".
 
