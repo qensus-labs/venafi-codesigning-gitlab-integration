@@ -23,6 +23,7 @@ config_schema = dict(
     SIGNATURE_DIGEST_ALGOS=dict(cast=list, subcast=str, default=('sha256',)),
     APPEND_SIGNATURES=dict(cast=bool, default=False),
     EXTRA_ARGS=dict(cast=list, subcast=str, default=()),
+    EXTRA_TRUSTED_TLS_CA_CERTS=dict(cast=str, default=None),
     SIGNTOOL_PATH=dict(cast=str, default=None),
     VENAFI_CLIENT_TOOLS_DIR=dict(cast=str, default=None),
     ISOLATE_SESSIONS=dict(cast=bool, default=False),
@@ -45,6 +46,7 @@ class SigntoolSignConfig:
     signature_digest_algos: List[str] = ('sha256',)
     append_signatures: bool = False
     extra_args: List[str] = ()
+    extra_trusted_tls_ca_certs: str = None
     signtool_path: str = None
     venafi_client_tools_dir: str = None
     isolate_sessions: bool = False
@@ -70,6 +72,7 @@ class SigntoolSignCommand:
         self.config = config
 
     def run(self):
+        self._maybe_add_extra_trusted_tls_ca_certs()
         self._create_temp_dir()
         try:
             self._generate_session_id()
@@ -79,6 +82,10 @@ class SigntoolSignCommand:
         finally:
             self._logout_tpp()
             self._delete_temp_dir()
+
+    def _maybe_add_extra_trusted_tls_ca_certs(self):
+        if self.config.extra_trusted_tls_ca_certs is not None:
+            utils.add_ca_cert_to_truststore(self.logger, self.config.extra_trusted_tls_ca_certs)
 
     def _create_temp_dir(self):
         self.temp_dir = tempfile.TemporaryDirectory()

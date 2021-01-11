@@ -499,6 +499,28 @@ Optional:
     EXTRA_ARGS: /arg1,/arg2
     ~~~
 
+ * `EXTRA_TRUSTED_TLS_CA_CERTS` (only applicable when using Docker): Allows registering extra TLS CA certificates into the truststore. This is useful if your TPP's TLS certificate is not recognized by the TLS trust store in our Docker image.
+
+   Set the value to the path of a PEM or DER file that contains one or more certificates to add to the trust store.
+
+   The certificates are added to the truststore during execution of `venafi-sign-signtool`. So the recommended way to use this feature, is by adding an additional command — prior to the execution of `venafi-sign-signtool` — to fetch the CA certificate file and to place it at the expected location. Example:
+
+   ~~~yaml
+   sign_signtool:
+     script:
+       - powershell -Command "Invoke-WebRequest -Uri 'https://internal.company.url/path-to-your-ca-chain.crt' -OutFile 'C:\downloaded-ca.crt'"
+       - venafi-sign-signtool
+     variables:
+       TPP_AUTH_URL: https://my-tpp/vedauth
+       TPP_HSM_URL: https://my-tpp/vedhsm
+       TPP_USERNAME: my_username
+       # TPP_PASSWORD should be set in the UI, with masking enabled.
+
+       INPUT: foo.exe
+       CERTIFICATE_SUBJECT_NAME: mydomain.com
+       EXTRA_TRUSTED_TLS_CA_CERTS: C:\downloaded-ca.crt
+   ~~~
+
  * `SIGNTOOL_PATH`: The full path to signtool.exe. If not specified, we assume that it's in PATH.
 
  * `VENAFI_CLIENT_TOOLS_DIR`: Specifies the path to the directory in which Venafi CodeSign Protect client tools are installed. If not specified, it's autodetected from the registry. If that fails, we fallback to C:\Program Files\Venafi CodeSign Protect.
@@ -597,6 +619,27 @@ Required:
  * `INPUT`: A path or a glob that specifies the file(s) to verify.
 
 Optional:
+
+ * `EXTRA_TRUSTED_TLS_CA_CERTS` (only applicable when using Docker): Allows registering extra TLS CA certificates into the truststore. This is useful if your TPP's TLS certificate is not recognized by the TLS trust store in our Docker image.
+
+   Set the value to the path of a PEM or DER file that contains one or more certificates to add to the trust store.
+
+   The certificates are added to the truststore during execution of `venafi-verify-signtool`. So the recommended way to use this feature, is by adding an additional command — prior to the execution of `venafi-verify-signtool` — to fetch the CA certificate file and to place it at the expected location. Example:
+
+   ~~~yaml
+   verify_signtool:
+     script:
+       - powershell -Command "Invoke-WebRequest -Uri 'https://internal.company.url/path-to-your-ca-chain.crt' -OutFile 'C:\downloaded-ca.crt'"
+       - venafi-verify-signtool
+     variables:
+       TPP_AUTH_URL: https://my-tpp/vedauth
+       TPP_HSM_URL: https://my-tpp/vedhsm
+       TPP_USERNAME: my_username
+       # TPP_PASSWORD should be set in the UI, with masking enabled.
+
+       INPUT: signed.exe
+       EXTRA_TRUSTED_TLS_CA_CERTS: C:\downloaded-ca.crt
+   ~~~
 
  * `SIGNTOOL_PATH`: The full path to signtool.exe. If not specified, we assume that it's in PATH.
 

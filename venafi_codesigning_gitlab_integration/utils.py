@@ -188,5 +188,13 @@ def invoke_command(logger, pre_message, success_message, error_message, short_cm
 
 def add_ca_cert_to_truststore(logger, path):
     logger.info(f'Adding {path} to the TLS truststore')
-    subprocess.run(['cp', path, '/etc/pki/ca-trust/source/anchors/'], check=True)
-    subprocess.run(['update-ca-trust', 'extract'], check=True)
+    if os.name == 'nt':
+        script = r'Import-Certificate -FilePath $env:INPUT -CertStoreLocation "Cert:\LocalMachine\root"' # noqa: E501
+        subprocess.run(
+            ['powershell', '-Command', script],
+            env={**os.environ, 'INPUT': path},
+            check=True
+        )
+    else:
+        subprocess.run(['cp', path, '/etc/pki/ca-trust/source/anchors/'], check=True)
+        subprocess.run(['update-ca-trust', 'extract'], check=True)

@@ -14,6 +14,7 @@ config_schema = dict(
 
     INPUT=str,
 
+    EXTRA_TRUSTED_TLS_CA_CERTS=dict(cast=str, default=None),
     SIGNTOOL_PATH=dict(cast=str, default=None),
     VENAFI_CLIENT_TOOLS_DIR=dict(cast=str, default=None),
     ISOLATE_SESSIONS=dict(cast=bool, default=False),
@@ -30,6 +31,7 @@ class SigntoolVerifyConfig:
 
     input: str
 
+    extra_trusted_tls_ca_certs: str = None
     signtool_path: str = None
     venafi_client_tools_dir: str = None
     isolate_sessions: bool = False
@@ -46,6 +48,7 @@ class SigntoolVerifyCommand:
         self.config = config
 
     def run(self):
+        self._maybe_add_extra_trusted_tls_ca_certs()
         try:
             self._generate_session_id()
             self._login_tpp()
@@ -53,6 +56,10 @@ class SigntoolVerifyCommand:
             self._invoke_signtool_verify()
         finally:
             self._logout_tpp()
+
+    def _maybe_add_extra_trusted_tls_ca_certs(self):
+        if self.config.extra_trusted_tls_ca_certs is not None:
+            utils.add_ca_cert_to_truststore(self.logger, self.config.extra_trusted_tls_ca_certs)
 
     def _generate_session_id(self):
         if self.config.isolate_sessions:
