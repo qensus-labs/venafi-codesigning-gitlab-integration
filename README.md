@@ -193,7 +193,7 @@ Optional:
 
    Set the value to the path of a .pem file that contains one or more certificates to add to the trust store.
 
-   The CA is added to the truststore during execution of `venafi-sign-jarsigner`. So the recommended way to use this feature, is by adding an additional command — prior to the execution of `venafi-sign-jarsigner` — to fetch the CA certificate file and to place it at the expected location. Example:
+   The certificates are added to the truststore during execution of `venafi-sign-jarsigner`. So the recommended way to use this feature, is by adding an additional command — prior to the execution of `venafi-sign-jarsigner` — to fetch the CA certificate file and to place it at the expected location. Example:
 
    ~~~yaml
    sign_jarsigner:
@@ -314,7 +314,7 @@ Optional:
 
    Set the value to the path of a .pem file that contains one or more certificates to add to the trust store.
 
-   The CA is added to the truststore during execution of `venafi-verify-jarsigner`. So the recommended way to use this feature, is by adding an additional command — prior to the execution of `venafi-verify-jarsigner` — to fetch the CA certificate file and to place it at the expected location. Example:
+   The certificates are added to the truststore during execution of `venafi-verify-jarsigner`. So the recommended way to use this feature, is by adding an additional command — prior to the execution of `venafi-verify-jarsigner` — to fetch the CA certificate file and to place it at the expected location. Example:
 
    ~~~yaml
    verify_jarsigner:
