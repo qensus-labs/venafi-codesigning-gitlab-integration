@@ -12,3 +12,6 @@ RUN cd /build && \
     python3 setup.py install && \
     cd / && \
     rm -rf /build
+
+ENV VENAFI_CONTAINER=true
+ENV ISOLATE_SESSIONS=false

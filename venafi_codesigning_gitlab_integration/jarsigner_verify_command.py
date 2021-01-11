@@ -20,6 +20,7 @@ config_schema = dict(
     INPUT_GLOB=dict(cast=str, default=None),
 
     VENAFI_CLIENT_TOOLS_DIR=dict(cast=str, default=None),
+    ISOLATE_SESSIONS=dict(cast=bool, default=False),
 )
 
 
@@ -35,6 +36,7 @@ class JarsignerVerifyConfig:
     input_glob: str = None
 
     venafi_client_tools_dir: str = None
+    isolate_sessions: bool = False
 
     @classmethod
     def from_env(cls):
@@ -89,8 +91,12 @@ class JarsignerVerifyCommand:
         return os.path.join(self.temp_dir.name, 'keystore')
 
     def _generate_session_id(self):
-        self.session_id = secrets.token_urlsafe(18)
-        self.logger.info('Session ID: %s' % (self.session_id,))
+        if self.config.isolate_sessions:
+            session_id = secrets.token_urlsafe(18)
+            self.session_env = {'LIBHSMINSTANCE': session_id}
+            self.logger.info(f'Session ID: {session_id}')
+        else:
+            self.session_env = {}
 
     def _login_tpp(self):
         utils.invoke_command(
@@ -121,9 +127,7 @@ class JarsignerVerifyCommand:
                 False,
                 True
             ],
-            env={
-                'LIBHSMINSTANCE': self.session_id
-            }
+            env=self.session_env
         )
 
     def _logout_tpp(self):
@@ -142,9 +146,7 @@ class JarsignerVerifyCommand:
                     '-force',
                     '-clear'
                 ],
-                env={
-                    'LIBHSMINSTANCE': self.session_id
-                }
+                env=self.session_env
             )
         except utils.AbortException:
             # utils.invoke_command() already logged an error message.
@@ -169,9 +171,7 @@ class JarsignerVerifyCommand:
                 '--file=' + self._get_cert_file_path(),
                 '--chainfile=' + self._get_chain_file_path()
             ],
-            env={
-                'LIBHSMINSTANCE': self.session_id
-            }
+            env=self.session_env
         )
 
     def _import_certificates(self):
