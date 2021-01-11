@@ -286,7 +286,7 @@ fetch_jar:
     paths:
       - signed.jar
 
-# Verify 'signed.jar' that was fetched by the 'fetched' stage.
+# Verify 'signed.jar' that was fetched by the 'fetch' stage.
 verify_jarsigner:
   stage: verify
   script:
@@ -557,7 +557,7 @@ fetch_exe:
     paths:
       - C:\signed.exe
 
-# Verify 'signed.exe' that was fetched by the 'fetche' stage.
+# Verify 'signed.exe' that was fetched by the 'fetch' stage.
 verify_signtool:
   stage: sign
   image:
@@ -594,7 +594,7 @@ fetch_exe:
     paths:
       - C:\signed.exe
 
-# Verify 'signed.exe' that was fetched by the 'fetche' stage.
+# Verify 'signed.exe' that was fetched by the 'fetch' stage.
 verify_signtool:
   stage: sign
   script:
