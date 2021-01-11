@@ -24,7 +24,7 @@ config_schema = dict(
     EXTRA_ARGS=dict(cast=list, subcast=str, default=()),
     EXTRA_TRUSTED_TLS_CA_CERTS=dict(cast=str, default=None),
     VENAFI_CLIENT_TOOLS_DIR=dict(cast=str, default=None),
-    ISOLATE_SESSIONS=dict(cast=bool, default=False),
+    ISOLATE_SESSIONS=dict(cast=bool, default=True),
 )
 
 
@@ -43,7 +43,7 @@ class JarsignerSignConfig:
     extra_args: List[str] = ()
     extra_trusted_tls_ca_certs: str = None
     venafi_client_tools_dir: str = None
-    isolate_sessions: bool = False
+    isolate_sessions: bool = True
 
     @classmethod
     def from_env(cls):
