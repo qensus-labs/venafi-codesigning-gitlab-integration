@@ -27,6 +27,10 @@ This product allows one to sign and verify files through Venafi CodeSign Protect
      - [Docker executor](#docker-executor-2)
      - [Shell or SSH executor](#shell-or-ssh-executor-2)
      - [Variables](#variables-2)
+   - [Verify with Signtool](#verify-with-signtool)
+     - [Docker executor](#docker-executor-3)
+     - [Shell or SSH executor](#shell-or-ssh-executor-3)
+     - [Variables](#variables-3)
  - [Signtool caveats](#signtool-caveats)
  - [Contribution & development](#contribution-development)
 
@@ -244,7 +248,7 @@ fetch_jar:
     paths:
       - signed.jar
 
-# Verify 'signed.jar' that was fetched by the 'fetched' stage.
+# Verify 'signed.jar' that was fetched by the 'fetch' stage.
 verify_jarsigner:
   stage: verify
   image:
@@ -500,6 +504,103 @@ Optional:
  * `VENAFI_CLIENT_TOOLS_DIR`: Specifies the path to the directory in which Venafi CodeSign Protect client tools are installed. If not specified, it's autodetected from the registry. If that fails, we fallback to C:\Program Files\Venafi CodeSign Protect.
 
  * `MACHINE_CONFIGURATION` (boolean): Whether to load CSP configuration from the machine registry hive instead of the user registry hive. Defaults to false.
+
+### Verify with Signtool
+
+This section shows how to verify one or more files with Microsoft's [Signtool](https://docs.microsoft.com/en-us/dotnet/framework/tools/signtool-exe) tool.
+
+*Important notes*:
+
+ - Please read the [Signtool caveats](#signtool-caveats).
+
+#### Docker executor
+
+ * Define a job that calls `venafi-verify-signtool`.
+ * Ensure the job operates within the image `quay.io/fullstaq-venafi-codesigning-gitlab-integration/signtool-x86_64`.
+ * Set the `INPUT` variable to a filename or a glob that you wish to verify.
+ * Set other required variables too. See the variables reference below.
+ * Our image uses x64 signtool by default. If you wish to use a different architecture's signtool, then set `SIGNTOOL_PATH` to `C:\winsdk\<arch>\signtool`.
+
+~~~yaml
+stages:
+  - fetch
+  - verify
+
+# Fetch a signed 'signed.exe' and pass it as an artifact to the 'verify' stage.
+fetch_exe:
+  stage: fetch
+  script:
+    - powershell -Command "Invoke-WebRequest -Uri 'https://internal.lan/signed.exe' -OutFile 'C:\signed.exe'"
+  artifacts:
+    paths:
+      - C:\signed.exe
+
+# Verify 'signed.exe' that was fetched by the 'fetche' stage.
+verify_signtool:
+  stage: sign
+  image:
+    name: quay.io/fullstaq-venafi-codesigning-gitlab-integration/signtool-x86_64
+  script:
+    - venafi-verify-signtool
+  variables:
+    TPP_AUTH_URL: https://my-tpp/vedauth
+    TPP_HSM_URL: https://my-tpp/vedhsm
+    TPP_USERNAME: my_username
+    # TPP_PASSWORD should be set in the UI, with masking enabled.
+
+    INPUT: signed.exe
+~~~
+
+### Shell or SSH executor
+
+ * Define a job that calls `venafi-verify-signtool`.
+ * Set the `INPUT` variable to a filename or a glob that you wish to verify.
+ * Set other required variables too. See the variables reference below.
+ * _Note_: We assume that signtool.exe is in PATH, unless you explicitly specify its path with `SIGNTOOL_PATH`.
+
+~~~yaml
+stages:
+  - fetch
+  - verify
+
+# Fetch a signed 'signed.exe' and pass it as an artifact to the 'verify' stage.
+fetch_exe:
+  stage: fetch
+  script:
+    - powershell -Command "Invoke-WebRequest -Uri 'https://internal.lan/signed.exe' -OutFile 'C:\signed.exe'"
+  artifacts:
+    paths:
+      - C:\signed.exe
+
+# Verify 'signed.exe' that was fetched by the 'fetche' stage.
+verify_signtool:
+  stage: sign
+  script:
+    - venafi-verify-signtool
+  variables:
+    TPP_AUTH_URL: https://my-tpp/vedauth
+    TPP_HSM_URL: https://my-tpp/vedhsm
+    TPP_USERNAME: my_username
+    # TPP_PASSWORD should be set in the UI, with masking enabled.
+
+    INPUT: signed.exe
+~~~
+
+### Variables
+
+Required:
+
+ * `TPP_AUTH_URL`: The TPP's authorization URL.
+ * `TPP_HSM_URL`: The TPP's Hardware Security Module (HSM) backend URL.
+ * `TPP_USERNAME`: A login username for the TPP.
+ * `TPP_PASSWORD`: The password associated with the login username.
+ * `INPUT`: A path or a glob that specifies the file(s) to verify.
+
+Optional:
+
+ * `SIGNTOOL_PATH`: The full path to signtool.exe. If not specified, we assume that it's in PATH.
+
+ * `VENAFI_CLIENT_TOOLS_DIR`: Specifies the path to the directory in which Venafi CodeSign Protect client tools are installed. If not specified, it's autodetected from the registry. If that fails, we fallback to C:\Program Files\Venafi CodeSign Protect.
 
 ## Signtool caveats
 
