@@ -1,12 +1,10 @@
 from dataclasses import dataclass
-from typing import List
 from venafi_codesigning_gitlab_integration import container_init_command
 from venafi_codesigning_gitlab_integration import utils
 import envparse
 import logging
 import sys
 import secrets
-import random
 
 config_schema = dict(
     TPP_AUTH_URL=str,

@@ -1,8 +1,13 @@
 # This is the container entrypoint script.
-import os, sys, logging, subprocess
+import os
+import sys
+import logging
+import subprocess
+
 
 def init_container_environment(logger):
-    if os.getenv('VENAFI_CONTAINER') != 'true' or os.getenv('VENAFI_CONTAINER_INITIALIZED') == 'true':
+    if os.getenv('VENAFI_CONTAINER') != 'true' or \
+       os.getenv('VENAFI_CONTAINER_INITIALIZED') == 'true':
         return
 
     logger.info('Initializing container environment')
@@ -11,6 +16,7 @@ def init_container_environment(logger):
     maybe_enable_csp_debugging(logger)
     os.environ['VENAFI_CONTAINER_INITIALIZED'] = 'true'
     logger.info('Container environment initialized')
+
 
 # Used by Windows tests to add an entry to the hosts file,
 # in order to be able to reach our test TPP.
@@ -22,11 +28,12 @@ def maybe_add_entry_to_hosts_file(logger):
     logger.info('Adding %s to hosts file' % (entry,))
     system_root = os.getenv('SystemRoot', 'C:\\Windows')
     hosts_file_path = os.path.join(system_root, 'system32',
-        'drivers', 'etc', 'hosts')
+                                   'drivers', 'etc', 'hosts')
     with open(hosts_file_path, 'a') as f:
         f.write("\n")
         f.write(entry)
         f.write("\n")
+
 
 def maybe_register_csp_dll(logger):
     if os.name != 'nt' or os.getenv('VENAFI_CONTAINER_REGISTER_CSP_DLL') != 'true':
@@ -38,6 +45,7 @@ def maybe_register_csp_dll(logger):
         ['regsvr32', '/s', os.path.join(system_root, 'system32', 'venaficsp.dll')],
         check=True, )
 
+
 def maybe_enable_csp_debugging(logger):
     if os.name != 'nt' or os.getenv('VENAFI_CONTAINER_DEBUG_CSP') != 'true':
         return
@@ -48,11 +56,13 @@ def maybe_enable_csp_debugging(logger):
         check=True
     )
 
+
 def get_default_shell():
     if os.name == 'nt':
         return 'powershell'
     else:
         return 'bash'
+
 
 def replace_current_process(argv):
     if os.name == 'nt':
@@ -68,6 +78,7 @@ def replace_current_process(argv):
     else:
         os.execvp(argv[0], argv)
 
+
 def main():
     logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)-8s %(message)s')
     init_container_environment(logging.getLogger())
@@ -75,6 +86,7 @@ def main():
         replace_current_process(sys.argv[1:])
     else:
         replace_current_process([get_default_shell()])
+
 
 if __name__ == '__main__':
     main()

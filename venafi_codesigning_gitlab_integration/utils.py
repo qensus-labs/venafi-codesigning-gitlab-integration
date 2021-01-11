@@ -171,7 +171,8 @@ def invoke_command(logger, pre_message, success_message, error_message, short_cm
         env = {**os.environ, **env}
     logger.info(pre_message)
     log_subprocess_run(logger, command, masks)
-    proc = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, env=env)
+    proc = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                          text=True, env=env)
     if proc.returncode == 0:
         if print_output_on_success:
             logger.info(proc.stdout)
