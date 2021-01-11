@@ -22,6 +22,7 @@ config_schema = dict(
     TIMESTAMPING_SERVERS=dict(cast=list, subcast=str, default=()),
 
     EXTRA_ARGS=dict(cast=list, subcast=str, default=()),
+    EXTRA_TRUSTED_TLS_CA_CERTS=dict(cast=str, default=None),
     VENAFI_CLIENT_TOOLS_DIR=dict(cast=str, default=None),
     ISOLATE_SESSIONS=dict(cast=bool, default=False),
 )
@@ -40,6 +41,7 @@ class JarsignerSignConfig:
     timestamping_servers: List[str] = ()
 
     extra_args: List[str] = ()
+    extra_trusted_tls_ca_certs: str = None
     venafi_client_tools_dir: str = None
     isolate_sessions: bool = False
 
@@ -61,6 +63,7 @@ class JarsignerSignCommand:
         self.config = config
 
     def run(self):
+        self._maybe_add_extra_trusted_tls_ca_certs()
         self._create_temp_dir()
         try:
             self._determine_input_paths()
@@ -71,6 +74,10 @@ class JarsignerSignCommand:
         finally:
             self._logout_tpp()
             self._delete_temp_dir()
+
+    def _maybe_add_extra_trusted_tls_ca_certs(self):
+        if self.config.extra_trusted_tls_ca_certs is not None:
+            utils.add_ca_cert_to_truststore(self.logger, self.config.extra_trusted_tls_ca_certs)
 
     def _create_temp_dir(self):
         self.temp_dir = tempfile.TemporaryDirectory()

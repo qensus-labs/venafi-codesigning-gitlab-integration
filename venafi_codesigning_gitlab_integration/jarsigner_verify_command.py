@@ -19,6 +19,7 @@ config_schema = dict(
     INPUT_PATH=dict(cast=str, default=None),
     INPUT_GLOB=dict(cast=str, default=None),
 
+    EXTRA_TRUSTED_TLS_CA_CERTS=dict(cast=str, default=None),
     VENAFI_CLIENT_TOOLS_DIR=dict(cast=str, default=None),
     ISOLATE_SESSIONS=dict(cast=bool, default=False),
 )
@@ -35,6 +36,7 @@ class JarsignerVerifyConfig:
     input_path: str = None
     input_glob: str = None
 
+    extra_trusted_tls_ca_certs: str = None
     venafi_client_tools_dir: str = None
     isolate_sessions: bool = False
 
@@ -56,6 +58,7 @@ class JarsignerVerifyCommand:
         self.config = config
 
     def run(self):
+        self._maybe_add_extra_trusted_tls_ca_certs()
         self._create_temp_dir()
         try:
             self._determine_input_paths()
@@ -67,6 +70,10 @@ class JarsignerVerifyCommand:
         finally:
             self._logout_tpp()
             self._delete_temp_dir()
+
+    def _maybe_add_extra_trusted_tls_ca_certs(self):
+        if self.config.extra_trusted_tls_ca_certs is not None:
+            utils.add_ca_cert_to_truststore(self.logger, self.config.extra_trusted_tls_ca_certs)
 
     def _create_temp_dir(self):
         self.temp_dir = tempfile.TemporaryDirectory()

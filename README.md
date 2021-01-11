@@ -189,6 +189,30 @@ Optional:
     EXTRA_ARGS: -arg1,-arg2
     ~~~
 
+ * `EXTRA_TRUSTED_TLS_CA_CERTS` (only applicable when using Docker): Allows registering extra TLS CA certificates into the truststore. This is useful if your TPP's TLS certificate is not recognized by the TLS trust store in our Docker image.
+
+   Set the value to the path of a .pem file that contains one or more certificates to add to the trust store.
+
+   The CA is added to the truststore during execution of `venafi-sign-jarsigner`. So the recommended way to use this feature, is by adding an additional command — prior to the execution of `venafi-sign-jarsigner` — to fetch the CA certificate file and to place it at the expected location. Example:
+
+   ~~~yaml
+   sign_jarsigner:
+     image:
+       name: quay.io/fullstaq-venafi-codesigning-gitlab-integration/jarsigner-x86_64
+     script:
+       - wget -O /downloaded-ca.crt https://internal.company.url/path-to-your-ca-chain.crt
+       - venafi-sign-jarsigner
+     variables:
+       TPP_AUTH_URL: https://my-tpp/vedauth
+       TPP_HSM_URL: https://my-tpp/vedhsm
+       TPP_USERNAME: my_username
+       # TPP_PASSWORD should be set in the UI, with masking enabled.
+
+       INPUT_PATH: foo.jar
+       CERTIFICATE_LABEL: my label
+       EXTRA_TRUSTED_TLS_CA_CERTS: /downloaded-ca.crt
+   ~~~
+
  * `VENAFI_CLIENT_TOOLS_DIR`: Specifies the path to the directory in which Venafi CodeSign Protect client tools are installed. If not specified, it's autodetected as follows:
 
      - Linux: /opt/venafi/codesign
@@ -285,6 +309,30 @@ Required:
  * `CERTIFICATE_LABEL`: The label of the certificate (inside the TPP) that was used for signing the file(s). You can obtain a list of labels with `pkcs11config listcertificates`.
 
 Optional:
+
+ * `EXTRA_TRUSTED_TLS_CA_CERTS` (only applicable when using Docker): Allows registering extra TLS CA certificates into the truststore. This is useful if your TPP's TLS certificate is not recognized by the TLS trust store in our Docker image.
+
+   Set the value to the path of a .pem file that contains one or more certificates to add to the trust store.
+
+   The CA is added to the truststore during execution of `venafi-verify-jarsigner`. So the recommended way to use this feature, is by adding an additional command — prior to the execution of `venafi-verify-jarsigner` — to fetch the CA certificate file and to place it at the expected location. Example:
+
+   ~~~yaml
+   verify_jarsigner:
+     image:
+       name: quay.io/fullstaq-venafi-codesigning-gitlab-integration/jarsigner-x86_64
+     script:
+       - wget -O /downloaded-ca.crt https://internal.company.url/path-to-your-ca-chain.crt
+       - venafi-verify-jarsigner
+     variables:
+       TPP_AUTH_URL: https://my-tpp/vedauth
+       TPP_HSM_URL: https://my-tpp/vedhsm
+       TPP_USERNAME: my_username
+       # TPP_PASSWORD should be set in the UI, with masking enabled.
+
+       INPUT_PATH: signed.jar
+       CERTIFICATE_LABEL: my label
+       EXTRA_TRUSTED_TLS_CA_CERTS: /downloaded-ca.crt
+   ~~~
 
  * `VENAFI_CLIENT_TOOLS_DIR`: Specifies the path to the directory in which Venafi CodeSign Protect client tools are installed. If not specified, it's autodetected as follows:
 

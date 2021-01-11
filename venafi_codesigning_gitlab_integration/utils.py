@@ -183,3 +183,9 @@ def invoke_command(logger, pre_message, success_message, error_message, short_cm
             "%s: command exited with code %d. Output from command '%s' is as follows:\n%s",
             error_message, proc.returncode, short_cmdline, proc.stdout)
         raise AbortException()
+
+
+def add_ca_cert_to_truststore(logger, path):
+    logger.info(f'Adding {path} to the TLS truststore')
+    subprocess.run(['cp', path, '/etc/pki/ca-trust/source/anchors/'], check=True)
+    subprocess.run(['update-ca-trust', 'extract'], check=True)
