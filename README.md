@@ -46,7 +46,7 @@ If you plan on using this Gitlab integration product in combination with the she
 
  * Install Venafi CodeSign Protect client tools (see [Compatibility](#compatibility) to learn which versions are supported)
     - You do *not* need to *configure* the client tools (i.e. they don't need to be configured with a TPP address or credentials). They just need to be installed. This Gitlab integration product will take care of configuring the client tools with specific TPPs.
- * Install Python >= 3.7. Ensure that it's in PATH.
+ * Install Python >= 3.8. Ensure that it's in PATH.
  * Install our Gitlab integration package: `pip install venafi-codesigning-gitlab-integration`
 
 ## Compatibility
