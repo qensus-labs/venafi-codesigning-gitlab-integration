@@ -1,4 +1,4 @@
-import setuptools, os
+import setuptools
 
 with open('README.md', 'r', encoding='UTF-8') as f:
     long_description = f.read()
@@ -13,16 +13,16 @@ setuptools.setup(
     long_description_content_type='text/markdown',
     url="https://github.com/fullstaq-labs/venafi-codesigning-gitlab-integration",
     platforms='any',
-    zip_safe=False, # we require support/java/*.class
+    zip_safe=False,  # we require support/java/*.class
     packages=['venafi_codesigning_gitlab_integration'],
     include_package_data=True,
     entry_points={
         'console_scripts': [
-            'venafi-container-init=venafi_codesigning_gitlab_integration.container_init_command:main',
-            'venafi-sign-jarsigner=venafi_codesigning_gitlab_integration.jarsigner_sign_command:main',
-            'venafi-verify-jarsigner=venafi_codesigning_gitlab_integration.jarsigner_verify_command:main',
-            'venafi-sign-signtool=venafi_codesigning_gitlab_integration.signtool_sign_command:main',
-            'venafi-verify-signtool=venafi_codesigning_gitlab_integration.signtool_verify_command:main',
+            'venafi-container-init=venafi_codesigning_gitlab_integration.container_init_command:main',  # noqa:E501
+            'venafi-sign-jarsigner=venafi_codesigning_gitlab_integration.jarsigner_sign_command:main',  # noqa:E501
+            'venafi-verify-jarsigner=venafi_codesigning_gitlab_integration.jarsigner_verify_command:main',  # noqa:E501
+            'venafi-sign-signtool=venafi_codesigning_gitlab_integration.signtool_sign_command:main',  # noqa:E501
+            'venafi-verify-signtool=venafi_codesigning_gitlab_integration.signtool_verify_command:main',  # noqa:E501
         ]
     },
     install_requires=[
