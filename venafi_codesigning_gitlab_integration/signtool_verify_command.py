@@ -4,13 +4,15 @@ from venafi_codesigning_gitlab_integration import utils
 import envparse
 import logging
 import sys
+import base64
 import secrets
 
 config_schema = dict(
     TPP_AUTH_URL=str,
     TPP_HSM_URL=str,
     TPP_USERNAME=str,
-    TPP_PASSWORD=str,
+    TPP_PASSWORD=dict(cast=str, default=None),
+    TPP_PASSWORD_BASE64=dict(cast=str, default=None),
 
     INPUT=str,
 
@@ -27,10 +29,10 @@ class SigntoolVerifyConfig:
     tpp_auth_url: str
     tpp_hsm_url: str
     tpp_username: str
-    tpp_password: str
-
     input: str
 
+    tpp_password: str = None
+    tpp_password_base64: str = None
     extra_trusted_tls_ca_certs: str = None
     signtool_path: str = None
     venafi_client_tools_dir: str = None
@@ -44,6 +46,11 @@ class SigntoolVerifyConfig:
 
 class SigntoolVerifyCommand:
     def __init__(self, logger, config: SigntoolVerifyConfig):
+        utils.check_one_of_two_config_options_set(
+            'TPP_PASSWORD', config.tpp_password,
+            'TPP_PASSWORD_BASE64', config.tpp_password_base64
+        )
+
         self.logger = logger
         self.config = config
 
@@ -69,6 +76,12 @@ class SigntoolVerifyCommand:
         else:
             self.session_env = {}
 
+    def _get_tpp_password(self) -> str:
+        if self.config.tpp_password is not None:
+            return self.config.tpp_password
+        else:
+            return str(base64.b64decode(self.config.tpp_password_base64), 'utf-8')
+
     def _login_tpp(self):
         command = [
             utils.get_cspconfig_tool_path(self.config.venafi_client_tools_dir),
@@ -78,7 +91,7 @@ class SigntoolVerifyCommand:
             '-hsmurl:' + self.config.tpp_hsm_url,
             '-username:' + self.config.tpp_username,
             '-password',
-            self.config.tpp_password
+            self._get_tpp_password()
         ]
         masks = [
             False,

@@ -6,6 +6,7 @@ import tempfile
 import logging
 import sys
 import os
+import base64
 import glob
 import secrets
 
@@ -13,7 +14,8 @@ config_schema = dict(
     TPP_AUTH_URL=str,
     TPP_HSM_URL=str,
     TPP_USERNAME=str,
-    TPP_PASSWORD=str,
+    TPP_PASSWORD=dict(cast=str, default=None),
+    TPP_PASSWORD_BASE64=dict(cast=str, default=None),
 
     CERTIFICATE_LABEL=str,
     INPUT_PATH=dict(cast=str, default=None),
@@ -30,9 +32,10 @@ class JarsignerVerifyConfig:
     tpp_auth_url: str
     tpp_hsm_url: str
     tpp_username: str
-    tpp_password: str
-
     certificate_label: str
+
+    tpp_password: str = None
+    tpp_password_base64: str = None
     input_path: str = None
     input_glob: str = None
 
@@ -47,12 +50,14 @@ class JarsignerVerifyConfig:
 
 class JarsignerVerifyCommand:
     def __init__(self, logger, config: JarsignerVerifyConfig):
-        if config.input_path is not None and config.input_glob is not None:
-            raise envparse.ConfigurationError(
-                "Only one of 'INPUT_PATH' or 'INPUT_GLOB' may be set, but not both")
-        if config.input_path is None and config.input_glob is None:
-            raise envparse.ConfigurationError(
-                "One of 'INPUT_PATH' or 'INPUT_GLOB' must be set.")
+        utils.check_one_of_two_config_options_set(
+            'INPUT_PATH', config.input_path,
+            'INPUT_GLOB', config.input_glob
+        )
+        utils.check_one_of_two_config_options_set(
+            'TPP_PASSWORD', config.tpp_password,
+            'TPP_PASSWORD_BASE64', config.tpp_password_base64
+        )
 
         self.logger = logger
         self.config = config
@@ -105,6 +110,12 @@ class JarsignerVerifyCommand:
         else:
             self.session_env = {}
 
+    def _get_tpp_password(self) -> str:
+        if self.config.tpp_password is not None:
+            return self.config.tpp_password
+        else:
+            return str(base64.b64decode(self.config.tpp_password_base64), 'utf-8')
+
     def _login_tpp(self):
         utils.invoke_command(
             self.logger,
@@ -122,7 +133,7 @@ class JarsignerVerifyCommand:
                 '--hsmurl=' + self.config.tpp_hsm_url,
                 '--username=' + self.config.tpp_username,
                 '--password',
-                self.config.tpp_password
+                self._get_tpp_password()
             ],
             masks=[
                 False,

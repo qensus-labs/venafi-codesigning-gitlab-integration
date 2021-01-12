@@ -6,6 +6,7 @@ import envparse
 import tempfile
 import logging
 import sys
+import base64
 import secrets
 import random
 
@@ -13,7 +14,8 @@ config_schema = dict(
     TPP_AUTH_URL=str,
     TPP_HSM_URL=str,
     TPP_USERNAME=str,
-    TPP_PASSWORD=str,
+    TPP_PASSWORD=dict(cast=str, default=None),
+    TPP_PASSWORD_BASE64=dict(cast=str, default=None),
 
     INPUT=str,
     CERTIFICATE_SUBJECT_NAME=dict(cast=str, default=None),
@@ -36,9 +38,10 @@ class SigntoolSignConfig:
     tpp_auth_url: str
     tpp_hsm_url: str
     tpp_username: str
-    tpp_password: str
-
     input: str
+
+    tpp_password: str = None
+    tpp_password_base64: str = None
     certificate_subject_name: str = None
     certificate_sha1: str = None
     timestamping_servers: List[str] = ()
@@ -59,14 +62,14 @@ class SigntoolSignConfig:
 
 class SigntoolSignCommand:
     def __init__(self, logger, config: SigntoolSignConfig):
-        if config.certificate_subject_name is not None and \
-           config.certificate_sha1 is not None:
-            raise envparse.ConfigurationError(
-                "Only one of 'CERTIFICATE_SUBJECT_NAME' or "
-                "'CERTIFICATE_SHA1' may be set, but not both")
-        if config.certificate_subject_name is None and config.certificate_sha1 is None:
-            raise envparse.ConfigurationError(
-                "One of 'CERTIFICATE_SUBJECT_NAME' or 'CERTIFICATE_SHA1' must be set.")
+        utils.check_one_of_two_config_options_set(
+            'CERTIFICATE_SUBJECT_NAME', config.certificate_subject_name,
+            'CERTIFICATE_SHA1', config.certificate_sha1
+        )
+        utils.check_one_of_two_config_options_set(
+            'TPP_PASSWORD', config.tpp_password,
+            'TPP_PASSWORD_BASE64', config.tpp_password_base64
+        )
 
         self.logger = logger
         self.config = config
@@ -102,6 +105,12 @@ class SigntoolSignCommand:
         else:
             self.session_env = {}
 
+    def _get_tpp_password(self) -> str:
+        if self.config.tpp_password is not None:
+            return self.config.tpp_password
+        else:
+            return str(base64.b64decode(self.config.tpp_password_base64), 'utf-8')
+
     def _login_tpp(self):
         command = [
             utils.get_cspconfig_tool_path(self.config.venafi_client_tools_dir),
@@ -111,7 +120,7 @@ class SigntoolSignCommand:
             '-hsmurl:' + self.config.tpp_hsm_url,
             '-username:' + self.config.tpp_username,
             '-password',
-            self.config.tpp_password
+            self._get_tpp_password()
         ]
         masks = [
             False,

@@ -103,7 +103,7 @@ sign_jarsigner:
     TPP_AUTH_URL: https://my-tpp/vedauth
     TPP_HSM_URL: https://my-tpp/vedhsm
     TPP_USERNAME: my_username
-    # TPP_PASSWORD should be set in the UI, with masking enabled.
+    # TPP_PASSWORD or TPP_PASSWORD_BASE64 should be set in the UI, with masking enabled.
 
     INPUT_PATH: foo.jar
     CERTIFICATE_LABEL: my label
@@ -144,7 +144,7 @@ sign_jarsigner:
     TPP_AUTH_URL: https://my-tpp/auth
     TPP_HSM_URL: https://my-tpp/hsm
     TPP_USERNAME: my_username
-    # TPP_PASSWORD should be set in the UI, with masking enabled.
+    # TPP_PASSWORD or TPP_PASSWORD_BASE64 should be set in the UI, with masking enabled.
 
     INPUT_PATH: foo.jar
     CERTIFICATE_LABEL: my label
@@ -160,7 +160,7 @@ Required:
  * `TPP_AUTH_URL`: The TPP's authorization URL.
  * `TPP_HSM_URL`: The TPP's Hardware Security Module (HSM) backend URL.
  * `TPP_USERNAME`: A login username for the TPP.
- * `TPP_PASSWORD`: The password associated with the login username.
+ * `TPP_PASSWORD` or `TPP_PASSWORD_BASE64`: The password associated with the login username. You can specify it normally, or in Base64 format. The latter is useful for storing the password in a Gitlab variable, in masked form, because Gitlab can only mask variables whose content only consists of Base64 characters.
  * `INPUT_PATH` or `INPUT_GLOB`: Specifies the file(s) to sign, either through a single filename, or a glob.
  * `CERTIFICATE_LABEL`: The label of the certificate (inside the TPP) to use for code signing. You can obtain a list of labels with `pkcs11config listcertificates`.
 
@@ -210,7 +210,7 @@ Optional:
        TPP_AUTH_URL: https://my-tpp/vedauth
        TPP_HSM_URL: https://my-tpp/vedhsm
        TPP_USERNAME: my_username
-       # TPP_PASSWORD should be set in the UI, with masking enabled.
+       # TPP_PASSWORD or TPP_PASSWORD_BASE64 should be set in the UI, with masking enabled.
 
        INPUT_PATH: foo.jar
        CERTIFICATE_LABEL: my label
@@ -259,7 +259,7 @@ verify_jarsigner:
     TPP_AUTH_URL: https://my-tpp/vedauth
     TPP_HSM_URL: https://my-tpp/vedhsm
     TPP_USERNAME: my_username
-    # TPP_PASSWORD should be set in the UI, with masking enabled.
+    # TPP_PASSWORD or TPP_PASSWORD_BASE64 should be set in the UI, with masking enabled.
 
     INPUT_PATH: signed.jar
     CERTIFICATE_LABEL: my label
@@ -295,7 +295,7 @@ verify_jarsigner:
     TPP_AUTH_URL: https://my-tpp/vedauth
     TPP_HSM_URL: https://my-tpp/vedhsm
     TPP_USERNAME: my_username
-    # TPP_PASSWORD should be set in the UI, with masking enabled.
+    # TPP_PASSWORD or TPP_PASSWORD_BASE64 should be set in the UI, with masking enabled.
 
     INPUT_PATH: signed.jar
     CERTIFICATE_LABEL: my label
@@ -308,7 +308,7 @@ Required:
  * `TPP_AUTH_URL`: The TPP's authorization URL.
  * `TPP_HSM_URL`: The TPP's Hardware Security Module (HSM) backend URL.
  * `TPP_USERNAME`: A login username for the TPP.
- * `TPP_PASSWORD`: The password associated with the login username.
+ * `TPP_PASSWORD` or `TPP_PASSWORD_BASE64`: The password associated with the login username. You can specify it normally, or in Base64 format. The latter is useful for storing the password in a Gitlab variable, in masked form, because Gitlab can only mask variables whose content only consists of Base64 characters.
  * `INPUT_PATH` or `INPUT_GLOB`: Specifies the file(s) to verify, either through a single filename, or a glob.
  * `CERTIFICATE_LABEL`: The label of the certificate (inside the TPP) that was used for signing the file(s). You can obtain a list of labels with `pkcs11config listcertificates`.
 
@@ -331,7 +331,7 @@ Optional:
        TPP_AUTH_URL: https://my-tpp/vedauth
        TPP_HSM_URL: https://my-tpp/vedhsm
        TPP_USERNAME: my_username
-       # TPP_PASSWORD should be set in the UI, with masking enabled.
+       # TPP_PASSWORD or TPP_PASSWORD_BASE64 should be set in the UI, with masking enabled.
 
        INPUT_PATH: signed.jar
        CERTIFICATE_LABEL: my label
@@ -387,7 +387,7 @@ sign_signtool:
     TPP_AUTH_URL: https://my-tpp/vedauth
     TPP_HSM_URL: https://my-tpp/vedhsm
     TPP_USERNAME: my_username
-    # TPP_PASSWORD should be set in the UI, with masking enabled.
+    # TPP_PASSWORD or TPP_PASSWORD_BASE64 should be set in the UI, with masking enabled.
 
     INPUT: foo.exe
     CERTIFICATE_SUBJECT_NAME: mydomain.com
@@ -427,7 +427,7 @@ sign_signtool:
     TPP_AUTH_URL: https://my-tpp/vedauth
     TPP_HSM_URL: https://my-tpp/vedhsm
     TPP_USERNAME: my_username
-    # TPP_PASSWORD should be set in the UI, with masking enabled.
+    # TPP_PASSWORD or TPP_PASSWORD_BASE64 should be set in the UI, with masking enabled.
 
     INPUT: foo.exe
     CERTIFICATE_SUBJECT_NAME: mydomain.com
@@ -443,7 +443,7 @@ Required:
  * `TPP_AUTH_URL`: The TPP's authorization URL.
  * `TPP_HSM_URL`: The TPP's Hardware Security Module (HSM) backend URL.
  * `TPP_USERNAME`: A login username for the TPP.
- * `TPP_PASSWORD`: The password associated with the login username.
+ * `TPP_PASSWORD` or `TPP_PASSWORD_BASE64`: The password associated with the login username. You can specify it normally, or in Base64 format. The latter is useful for storing the password in a Gitlab variable, in masked form, because Gitlab can only mask variables whose content only consists of Base64 characters.
  * `INPUT`: A path or a glob that specifies the file(s) to be signed.
  * `CERTIFICATE_SUBJECT_NAME` or `CERTIFICATE_SHA1`: Specifies the certificate (inside the TPP) to use for signing.
 
@@ -514,7 +514,7 @@ Optional:
        TPP_AUTH_URL: https://my-tpp/vedauth
        TPP_HSM_URL: https://my-tpp/vedhsm
        TPP_USERNAME: my_username
-       # TPP_PASSWORD should be set in the UI, with masking enabled.
+       # TPP_PASSWORD or TPP_PASSWORD_BASE64 should be set in the UI, with masking enabled.
 
        INPUT: foo.exe
        CERTIFICATE_SUBJECT_NAME: mydomain.com
@@ -568,7 +568,7 @@ verify_signtool:
     TPP_AUTH_URL: https://my-tpp/vedauth
     TPP_HSM_URL: https://my-tpp/vedhsm
     TPP_USERNAME: my_username
-    # TPP_PASSWORD should be set in the UI, with masking enabled.
+    # TPP_PASSWORD or TPP_PASSWORD_BASE64 should be set in the UI, with masking enabled.
 
     INPUT: signed.exe
 ~~~
@@ -603,7 +603,7 @@ verify_signtool:
     TPP_AUTH_URL: https://my-tpp/vedauth
     TPP_HSM_URL: https://my-tpp/vedhsm
     TPP_USERNAME: my_username
-    # TPP_PASSWORD should be set in the UI, with masking enabled.
+    # TPP_PASSWORD or TPP_PASSWORD_BASE64 should be set in the UI, with masking enabled.
 
     INPUT: signed.exe
 ~~~
@@ -615,7 +615,7 @@ Required:
  * `TPP_AUTH_URL`: The TPP's authorization URL.
  * `TPP_HSM_URL`: The TPP's Hardware Security Module (HSM) backend URL.
  * `TPP_USERNAME`: A login username for the TPP.
- * `TPP_PASSWORD`: The password associated with the login username.
+ * `TPP_PASSWORD` or `TPP_PASSWORD_BASE64`: The password associated with the login username. You can specify it normally, or in Base64 format. The latter is useful for storing the password in a Gitlab variable, in masked form, because Gitlab can only mask variables whose content only consists of Base64 characters.
  * `INPUT`: A path or a glob that specifies the file(s) to verify.
 
 Optional:
@@ -635,7 +635,7 @@ Optional:
        TPP_AUTH_URL: https://my-tpp/vedauth
        TPP_HSM_URL: https://my-tpp/vedhsm
        TPP_USERNAME: my_username
-       # TPP_PASSWORD should be set in the UI, with masking enabled.
+       # TPP_PASSWORD or TPP_PASSWORD_BASE64 should be set in the UI, with masking enabled.
 
        INPUT: signed.exe
        EXTRA_TRUSTED_TLS_CA_CERTS: C:\downloaded-ca.crt
