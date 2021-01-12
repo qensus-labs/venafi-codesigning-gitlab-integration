@@ -20,7 +20,7 @@ class AbortException(Exception):
 def check_one_of_two_config_options_set(name1, val1, name2, val2):
     if val1 is not None and val2 is not None:
         raise envparse.ConfigurationError(
-            f"Only one of '{name1}' or '{name2}' may be set, but not both")
+            f"Only one of '{name1}' or '{name2}' may be set, but not both.")
     if val1 is None and val2 is None:
         raise envparse.ConfigurationError(
             f"One of '{name1}' or '{name2}' must be set.")
