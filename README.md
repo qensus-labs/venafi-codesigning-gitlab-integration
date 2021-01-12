@@ -352,6 +352,7 @@ Usage instructions:
 
  - We assume that signtool.exe is in PATH, unless you explicitly specify its path with `SIGNTOOL_PATH`.
  - We use 'sha256' as the default signature digest algorithm, unlike Signtool's default ('sha1'). You may want to override this if you care about compatibility with older Windows versions that didn't support SHA-256.
+ - Only the shell or SSH executor is supported. Gitlab Runner's Docker executor does not support Windows.
  - Please read the [Signtool caveats](#signtool-caveats).
 
 ~~~yaml
@@ -474,6 +475,7 @@ Usage instructions:
 *Notes*:
 
  - We assume that signtool.exe is in PATH, unless you explicitly specify its path with `SIGNTOOL_PATH`.
+ - Only the shell or SSH executor is supported. Gitlab Runner's Docker executor does not support Windows.
  - Please read the [Signtool caveats](#signtool-caveats).
 
 ~~~yaml
