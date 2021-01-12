@@ -42,6 +42,7 @@ If you plan on using this Gitlab integration product in combination with the she
 
  * Install Venafi CodeSign Protect client tools (see [Compatibility](#compatibility) to learn which versions are supported)
     - You do *not* need to *configure* the client tools (i.e. they don't need to be configured with a TPP address or credentials). They just need to be installed. This Gitlab integration product will take care of configuring the client tools with specific TPPs.
+ * Install one or more signing tools, e.g. [Jarsigner](https://docs.oracle.com/javase/7/docs/technotes/tools/windows/jarsigner.html) (part of the JDK) or [Signtool](https://docs.microsoft.com/en-us/dotnet/framework/tools/signtool-exe) (part of the Windows 10 SDK).
  * Install Python >= 3.8. Ensure that it's in PATH.
  * Install our Gitlab integration package: `pip install venafi-codesigning-gitlab-integration`
 
@@ -340,17 +341,18 @@ Optional:
 
 This section shows how to sign one or more files with Microsoft's [Signtool](https://docs.microsoft.com/en-us/dotnet/framework/tools/signtool-exe) tool.
 
-*Important notes*:
-
- - We use 'sha256' as the default signature digest algorithm, unlike Signtool's default ('sha1'). You may want to override this if you care about compatibility with older Windows versions that didn't support SHA-256.
- - Please read the [Signtool caveats](#signtool-caveats).
-
 Usage instructions:
 
  * Define a job that calls `venafi-sign-signtool`.
+ * Ensure that this job runs on a Windows-based runner, by setting the proper tags.
  * Set the `INPUT` variable to a filename or a glob that you wish to sign.
  * Set other required variables too. See the variables reference below.
- * _Note_: We assume that signtool.exe is in PATH, unless you explicitly specify its path with `SIGNTOOL_PATH`.
+
+*Notes*:
+
+ - We assume that signtool.exe is in PATH, unless you explicitly specify its path with `SIGNTOOL_PATH`.
+ - We use 'sha256' as the default signature digest algorithm, unlike Signtool's default ('sha1'). You may want to override this if you care about compatibility with older Windows versions that didn't support SHA-256.
+ - Please read the [Signtool caveats](#signtool-caveats).
 
 ~~~yaml
 stages:
@@ -360,6 +362,8 @@ stages:
 # Build a 'foo.exe' and pass it as an artifact to the 'sign' stage.
 build_exe:
   stage: build
+  tags:
+    - windows
   script:
     - copy C:\Windows\System32\Notepad.exe foo.exe
   artifacts:
@@ -370,6 +374,8 @@ build_exe:
 # then store the signed exe as an artifact.
 sign_signtool:
   stage: sign
+  tags:
+    - windows
   script:
     - venafi-sign-signtool
   variables:
@@ -458,16 +464,17 @@ Optional:
 
 This section shows how to verify one or more files with Microsoft's [Signtool](https://docs.microsoft.com/en-us/dotnet/framework/tools/signtool-exe) tool.
 
-*Important notes*:
-
- - Please read the [Signtool caveats](#signtool-caveats).
-
 Usage instructions:
 
  * Define a job that calls `venafi-verify-signtool`.
+ * Ensure that this job runs on a Windows-based runner, by setting the proper tags.
  * Set the `INPUT` variable to a filename or a glob that you wish to verify.
  * Set other required variables too. See the variables reference below.
- * _Note_: We assume that signtool.exe is in PATH, unless you explicitly specify its path with `SIGNTOOL_PATH`.
+
+*Notes*:
+
+ - We assume that signtool.exe is in PATH, unless you explicitly specify its path with `SIGNTOOL_PATH`.
+ - Please read the [Signtool caveats](#signtool-caveats).
 
 ~~~yaml
 stages:
@@ -477,6 +484,8 @@ stages:
 # Fetch a signed 'signed.exe' and pass it as an artifact to the 'verify' stage.
 fetch_exe:
   stage: fetch
+  tags:
+    - windows
   script:
     - powershell -Command "Invoke-WebRequest -Uri 'https://internal.lan/signed.exe' -OutFile 'C:\signed.exe'"
   artifacts:
@@ -486,6 +495,8 @@ fetch_exe:
 # Verify 'signed.exe' that was fetched by the 'fetch' stage.
 verify_signtool:
   stage: sign
+  tags:
+    - windows
   script:
     - venafi-verify-signtool
   variables:
