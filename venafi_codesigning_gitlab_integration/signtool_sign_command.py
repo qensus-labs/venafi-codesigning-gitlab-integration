@@ -17,7 +17,7 @@ config_schema = dict(
     TPP_PASSWORD=dict(cast=str, default=None),
     TPP_PASSWORD_BASE64=dict(cast=str, default=None),
 
-    INPUT=str,
+    INPUT_PATH=str,
     CERTIFICATE_SUBJECT_NAME=dict(cast=str, default=None),
     CERTIFICATE_SHA1=dict(cast=str, default=None),
     TIMESTAMPING_SERVERS=dict(cast=list, subcast=str, default=()),
@@ -38,7 +38,7 @@ class SigntoolSignConfig:
     tpp_auth_url: str
     tpp_hsm_url: str
     tpp_username: str
-    input: str
+    input_path: str
 
     tpp_password: str = None
     tpp_password_base64: str = None
@@ -244,13 +244,13 @@ class SigntoolSignCommand:
                 command.append('/sm')
 
             command += self.config.extra_args
-            command.append(self.config.input)
+            command.append(self.config.input_path)
 
             utils.invoke_command(
                 self.logger,
-                'Signing with signtool: %s' % (self.config.input,),
-                "Successfully signed '%s'." % (self.config.input,),
-                "Error signing '%s'" % (self.config.input,),
+                f'Signing with signtool: {self.config.input_path}',
+                f"Successfully signed '{self.config.input_path}'.",
+                f"Error signing '{self.config.input_path}'",
                 'signtool',
                 print_output_on_success=True,
                 command=command,

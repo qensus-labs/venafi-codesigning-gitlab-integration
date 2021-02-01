@@ -352,7 +352,7 @@ Usage instructions:
  * Define a job that calls `venafi-sign-signtool`.
  * Ensure that this job runs on a Windows-based runner, by setting the proper tags.
  * Ensure this job operates within the image `quay.io/fullstaq-venafi-codesigning-gitlab-integration/signtool-x86_64`.
- * Set the `INPUT` variable to a filename or a glob that you wish to sign.
+ * Set the `INPUT_PATH` variable to a filename or a glob that you wish to sign.
  * Set other required variables too. See the variables reference below.
 
 *Notes*:
@@ -393,7 +393,7 @@ sign_signtool:
     TPP_USERNAME: my_username
     # TPP_PASSWORD or TPP_PASSWORD_BASE64 should be set in the UI, with masking enabled.
 
-    INPUT: foo.exe
+    INPUT_PATH: foo.exe
     CERTIFICATE_SUBJECT_NAME: mydomain.com
   artifacts:
     paths:
@@ -406,7 +406,7 @@ Usage instructions:
 
  * Define a job that calls `venafi-sign-signtool`.
  * Ensure that this job runs on a Windows-based runner, by setting the proper tags.
- * Set the `INPUT` variable to a filename or a glob that you wish to sign.
+ * Set the `INPUT_PATH` variable to a filename or a glob that you wish to sign.
  * Set other required variables too. See the variables reference below.
 
 *Notes*:
@@ -445,7 +445,7 @@ sign_signtool:
     TPP_USERNAME: my_username
     # TPP_PASSWORD or TPP_PASSWORD_BASE64 should be set in the UI, with masking enabled.
 
-    INPUT: foo.exe
+    INPUT_PATH: foo.exe
     CERTIFICATE_SUBJECT_NAME: mydomain.com
   artifacts:
     paths:
@@ -460,7 +460,7 @@ Required:
  * `TPP_HSM_URL`: The TPP's Hardware Security Module (HSM) backend URL.
  * `TPP_USERNAME`: A login username for the TPP.
  * `TPP_PASSWORD` or `TPP_PASSWORD_BASE64`: The password associated with the login username. You can specify it normally, or in Base64 format. The latter is useful for storing the password in a Gitlab variable, in masked form, because Gitlab can only mask variables whose content only consists of Base64 characters.
- * `INPUT`: A path or a glob that specifies the file(s) to be signed.
+ * `INPUT_PATH`: A path or a glob that specifies the file(s) to be signed.
  * `CERTIFICATE_SUBJECT_NAME` or `CERTIFICATE_SHA1`: Specifies the certificate (inside the TPP) to use for signing.
 
    You can either specify the certificate's Common Name ("Issued to" or "CN"), or its SHA-1 hash.
@@ -532,7 +532,7 @@ Optional:
        TPP_USERNAME: my_username
        # TPP_PASSWORD or TPP_PASSWORD_BASE64 should be set in the UI, with masking enabled.
 
-       INPUT: foo.exe
+       INPUT_PATH: foo.exe
        CERTIFICATE_SUBJECT_NAME: mydomain.com
        EXTRA_TRUSTED_TLS_CA_CERTS: C:\downloaded-ca.crt
    ~~~
@@ -554,7 +554,7 @@ Usage instructions:
  * Define a job that calls `venafi-verify-signtool`.
  * Ensure that this job runs on a Windows-based runner, by setting the proper tags.
  * Ensure this job operates within the image `quay.io/fullstaq-venafi-codesigning-gitlab-integration/signtool-x86_64`.
- * Set the `INPUT` variable to a filename or a glob that you wish to verify.
+ * Set the `INPUT_PATH` variable to a filename or a glob that you wish to verify.
  * Set other required variables too. See the variables reference below.
 
 *Notes*:
@@ -593,7 +593,7 @@ verify_signtool:
     TPP_USERNAME: my_username
     # TPP_PASSWORD or TPP_PASSWORD_BASE64 should be set in the UI, with masking enabled.
 
-    INPUT: signed.exe
+    INPUT_PATH: signed.exe
 ~~~
 
 #### Shell or SSH executor
@@ -602,7 +602,7 @@ Usage instructions:
 
  * Define a job that calls `venafi-verify-signtool`.
  * Ensure that this job runs on a Windows-based runner, by setting the proper tags.
- * Set the `INPUT` variable to a filename or a glob that you wish to verify.
+ * Set the `INPUT_PATH` variable to a filename or a glob that you wish to verify.
  * Set other required variables too. See the variables reference below.
 
 *Notes*:
@@ -639,7 +639,7 @@ verify_signtool:
     TPP_USERNAME: my_username
     # TPP_PASSWORD or TPP_PASSWORD_BASE64 should be set in the UI, with masking enabled.
 
-    INPUT: signed.exe
+    INPUT_PATH: signed.exe
 ~~~
 
 #### Variables
@@ -650,7 +650,7 @@ Required:
  * `TPP_HSM_URL`: The TPP's Hardware Security Module (HSM) backend URL.
  * `TPP_USERNAME`: A login username for the TPP.
  * `TPP_PASSWORD` or `TPP_PASSWORD_BASE64`: The password associated with the login username. You can specify it normally, or in Base64 format. The latter is useful for storing the password in a Gitlab variable, in masked form, because Gitlab can only mask variables whose content only consists of Base64 characters.
- * `INPUT`: A path or a glob that specifies the file(s) to verify.
+ * `INPUT_PATH`: A path or a glob that specifies the file(s) to verify.
 
 Optional:
 
@@ -671,7 +671,7 @@ Optional:
        TPP_USERNAME: my_username
        # TPP_PASSWORD or TPP_PASSWORD_BASE64 should be set in the UI, with masking enabled.
 
-       INPUT: signed.exe
+       INPUT_PATH: signed.exe
        EXTRA_TRUSTED_TLS_CA_CERTS: C:\downloaded-ca.crt
    ~~~
 

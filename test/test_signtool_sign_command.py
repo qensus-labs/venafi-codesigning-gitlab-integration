@@ -20,7 +20,7 @@ def test_successful_signing_session(monkeypatch, caplog):
 
     config = SigntoolSignConfig(
         certificate_subject_name='my cert',
-        input='foo.exe',
+        input_path='foo.exe',
         **fake_tpp_config
     )
 
@@ -61,7 +61,7 @@ def test_tpp_login_error(monkeypatch, caplog):
 
     config = SigntoolSignConfig(
         certificate_subject_name='my cert',
-        input='foo.exe',
+        input_path='foo.exe',
         **fake_tpp_config
     )
 
@@ -87,7 +87,7 @@ def test_tpp_logout_error(monkeypatch, caplog):
 
     config = SigntoolSignConfig(
         certificate_subject_name='my cert',
-        input='foo.exe',
+        input_path='foo.exe',
         **fake_tpp_config
     )
 
@@ -111,7 +111,7 @@ def test_signtool_error(monkeypatch, caplog):
 
     config = SigntoolSignConfig(
         certificate_subject_name='my cert',
-        input='foo.exe',
+        input_path='foo.exe',
         **fake_tpp_config
     )
 
@@ -137,7 +137,7 @@ def test_sign_with_certificate_sha1(monkeypatch, caplog):
 
     config = SigntoolSignConfig(
         certificate_sha1='abcd1234',
-        input='foo.exe',
+        input_path='foo.exe',
         **fake_tpp_config
     )
 
@@ -160,7 +160,7 @@ def test_timestamping_servers(monkeypatch, caplog):
 
     config = SigntoolSignConfig(
         certificate_subject_name='my cert',
-        input='foo.exe',
+        input_path='foo.exe',
         timestamping_servers=['timestamp1.com'],
         **fake_tpp_config
     )
@@ -184,7 +184,7 @@ def test_append_signature(monkeypatch, caplog):
 
     config = SigntoolSignConfig(
         certificate_subject_name='my cert',
-        input='foo.exe',
+        input_path='foo.exe',
         append_signatures=True,
         **fake_tpp_config
     )
@@ -207,7 +207,7 @@ def test_multiple_signatures(monkeypatch, caplog):
 
     config = SigntoolSignConfig(
         certificate_subject_name='my cert',
-        input='foo.exe',
+        input_path='foo.exe',
         timestamping_servers=['timestamp1.com'],
         signature_digest_algos=['sha1', 'sha256'],
         **fake_tpp_config
@@ -238,7 +238,7 @@ def test_extra_args(monkeypatch, caplog):
 
     config = SigntoolSignConfig(
         certificate_subject_name='my cert',
-        input='foo.exe',
+        input_path='foo.exe',
         extra_args=['/aaaa', '/bbbb'],
         **fake_tpp_config
     )
@@ -261,7 +261,7 @@ def test_venafi_client_tools_dir(monkeypatch, caplog):
 
     config = SigntoolSignConfig(
         certificate_subject_name='my cert',
-        input='foo.jar',
+        input_path='foo.jar',
         venafi_client_tools_dir='C:\\Venafi',
         **fake_tpp_config
     )
@@ -282,7 +282,7 @@ def test_signtool_path(monkeypatch, caplog):
 
     config = SigntoolSignConfig(
         certificate_subject_name='my cert',
-        input='foo.exe',
+        input_path='foo.exe',
         signtool_path='C:\\Windows SDK\\bin\\signtool.exe',
         **fake_tpp_config
     )

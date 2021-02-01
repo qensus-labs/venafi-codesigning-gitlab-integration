@@ -19,7 +19,7 @@ def test_successful_verify_session(monkeypatch, caplog):
     caplog.set_level(logging.INFO)
 
     config = SigntoolVerifyConfig(
-        input='foo.exe',
+        input_path='foo.exe',
         **fake_tpp_config
     )
 
@@ -59,7 +59,7 @@ def test_tpp_login_error(monkeypatch, caplog):
     caplog.set_level(logging.INFO)
 
     config = SigntoolVerifyConfig(
-        input='foo.exe',
+        input_path='foo.exe',
         **fake_tpp_config
     )
 
@@ -84,7 +84,7 @@ def test_tpp_logout_error(monkeypatch, caplog):
     caplog.set_level(logging.INFO)
 
     config = SigntoolVerifyConfig(
-        input='foo.exe',
+        input_path='foo.exe',
         **fake_tpp_config
     )
 
@@ -107,7 +107,7 @@ def test_unsigned_error(monkeypatch, caplog):
     caplog.set_level(logging.INFO)
 
     config = SigntoolVerifyConfig(
-        input='foo.exe',
+        input_path='foo.exe',
         **fake_tpp_config
     )
 
@@ -132,7 +132,7 @@ def test_venafi_client_tools_dir(monkeypatch, caplog):
     caplog.set_level(logging.INFO)
 
     config = SigntoolVerifyConfig(
-        input='foo.jar',
+        input_path='foo.jar',
         venafi_client_tools_dir='C:\\Venafi',
         **fake_tpp_config
     )
@@ -152,7 +152,7 @@ def test_signtool_path(monkeypatch, caplog):
     caplog.set_level(logging.INFO)
 
     config = SigntoolVerifyConfig(
-        input='foo.exe',
+        input_path='foo.exe',
         signtool_path='C:\\Windows SDK\\bin\\signtool.exe',
         **fake_tpp_config
     )

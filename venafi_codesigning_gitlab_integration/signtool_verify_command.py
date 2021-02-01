@@ -14,7 +14,7 @@ config_schema = dict(
     TPP_PASSWORD=dict(cast=str, default=None),
     TPP_PASSWORD_BASE64=dict(cast=str, default=None),
 
-    INPUT=str,
+    INPUT_PATH=str,
 
     EXTRA_TRUSTED_TLS_CA_CERTS=dict(cast=str, default=None),
     SIGNTOOL_PATH=dict(cast=str, default=None),
@@ -29,7 +29,7 @@ class SigntoolVerifyConfig:
     tpp_auth_url: str
     tpp_hsm_url: str
     tpp_username: str
-    input: str
+    input_path: str
 
     tpp_password: str = None
     tpp_password_base64: str = None
@@ -177,16 +177,16 @@ class SigntoolVerifyCommand:
 
         utils.invoke_command(
             self.logger,
-            'Verifying with signtool: %s' % (self.config.input,),
-            "Successfully verified '%s'." % (self.config.input,),
-            "Error verifying '%s'" % (self.config.input,),
+            f'Verifying with signtool: {self.config.input_path}',
+            f"Successfully verified '{self.config.input_path}'.",
+            f"Error verifying '{self.config.input_path}'",
             'signtool',
             print_output_on_success=True,
             command=[
                 signtool_path,
                 'verify',
                 '/pa',
-                self.config.input
+                self.config.input_path
             ],
             env={
                 # With VENAFICSPSilent, when an error occurs at the Venafi CSP driver level,
