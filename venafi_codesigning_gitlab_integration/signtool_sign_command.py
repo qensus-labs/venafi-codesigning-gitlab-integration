@@ -3,7 +3,6 @@ from typing import List
 from venafi_codesigning_gitlab_integration import container_init_command
 from venafi_codesigning_gitlab_integration import utils
 import envparse
-import tempfile
 import logging
 import sys
 import base64
@@ -76,7 +75,6 @@ class SigntoolSignCommand:
 
     def run(self):
         self._maybe_add_extra_trusted_tls_ca_certs()
-        self._create_temp_dir()
         try:
             self._generate_session_id()
             self._login_tpp()
@@ -84,18 +82,10 @@ class SigntoolSignCommand:
             self._invoke_signtool()
         finally:
             self._logout_tpp()
-            self._delete_temp_dir()
 
     def _maybe_add_extra_trusted_tls_ca_certs(self):
         if self.config.extra_trusted_tls_ca_certs is not None:
             utils.add_ca_cert_to_truststore(self.logger, self.config.extra_trusted_tls_ca_certs)
-
-    def _create_temp_dir(self):
-        self.temp_dir = tempfile.TemporaryDirectory()
-
-    def _delete_temp_dir(self):
-        if hasattr(self, 'temp_dir'):
-            self.temp_dir.cleanup()
 
     def _generate_session_id(self):
         if self.config.isolate_sessions:
@@ -177,7 +167,8 @@ class SigntoolSignCommand:
             # utils.invoke_command() already logged an error message.
             pass
         except Exception:
-            # Don't reraise exception: allow temp_dir to be cleaned up
+            # Don't reraise exception: preserve original exception in
+            # run()'s try block
             logging.exception('Unexpected exception during TPP logout')
 
     def _invoke_csp_config_sync(self):
