@@ -675,6 +675,10 @@ Optional:
        EXTRA_TRUSTED_TLS_CA_CERTS: C:\downloaded-ca.crt
    ~~~
 
+ * `TRUSTED_CHAIN_LABEL` (only applicable when using Docker): Allows registering a chain in the TPP, into the truststore. This is useful if you want to verify files, that are signed with a chain that's not already in the container's default truststore.
+
+   Set the value to the label of the certificate (inside the TPP) for which its chain you want to trust. You can obtain a list of labels with `cspconfig listcertificates`.
+
  * `SIGNTOOL_PATH`: The full path to signtool.exe. If not specified, we assume that it's in PATH.
 
  * `VENAFI_CLIENT_TOOLS_DIR`: Specifies the path to the directory in which Venafi CodeSign Protect client tools are installed. If not specified, it's autodetected from the registry. If that fails, we fallback to C:\Program Files\Venafi CodeSign Protect.

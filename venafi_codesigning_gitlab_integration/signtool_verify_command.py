@@ -2,8 +2,10 @@ from dataclasses import dataclass
 from venafi_codesigning_gitlab_integration import container_init_command
 from venafi_codesigning_gitlab_integration import utils
 import envparse
+import tempfile
 import logging
 import sys
+import os
 import base64
 import secrets
 
@@ -17,6 +19,7 @@ config_schema = dict(
     INPUT_PATH=str,
 
     EXTRA_TRUSTED_TLS_CA_CERTS=dict(cast=str, default=None),
+    TRUSTED_CHAIN_LABEL=dict(cast=str, default=None),
     SIGNTOOL_PATH=dict(cast=str, default=None),
     VENAFI_CLIENT_TOOLS_DIR=dict(cast=str, default=None),
     ISOLATE_SESSIONS=dict(cast=bool, default=True),
@@ -34,6 +37,7 @@ class SigntoolVerifyConfig:
     tpp_password: str = None
     tpp_password_base64: str = None
     extra_trusted_tls_ca_certs: str = None
+    trusted_chain_label: str = None
     signtool_path: str = None
     venafi_client_tools_dir: str = None
     isolate_sessions: bool = True
@@ -56,17 +60,28 @@ class SigntoolVerifyCommand:
 
     def run(self):
         self._maybe_add_extra_trusted_tls_ca_certs()
+        self._maybe_create_temp_dir()
         try:
             self._generate_session_id()
             self._login_tpp()
+            self._maybe_trust_chain_with_label()
             self._invoke_csp_config_sync()
             self._invoke_signtool_verify()
         finally:
             self._logout_tpp()
+            self._delete_temp_dir()
 
     def _maybe_add_extra_trusted_tls_ca_certs(self):
         if self.config.extra_trusted_tls_ca_certs is not None:
             utils.add_ca_cert_to_truststore(self.logger, self.config.extra_trusted_tls_ca_certs)
+
+    def _maybe_create_temp_dir(self):
+        if self.config.trusted_chain_label is not None:
+            self.temp_dir = tempfile.TemporaryDirectory()
+
+    def _delete_temp_dir(self):
+        if hasattr(self, 'temp_dir'):
+            self.temp_dir.cleanup()
 
     def _generate_session_id(self):
         if self.config.isolate_sessions:
@@ -151,6 +166,33 @@ class SigntoolVerifyCommand:
             # Don't reraise exception: preserve original exception in
             # run()'s try block
             logging.exception('Unexpected exception during TPP logout')
+
+    def _maybe_trust_chain_with_label(self):
+        if self.config.trusted_chain_label is None:
+            return
+
+        trusted_chain_path = os.path.join(self.temp_dir.name, 'chain.crt')
+        command = [
+            'cspconfig',
+            'getcert',
+            '-label',
+            self.config.trusted_chain_label,
+            '-chainfile',
+            trusted_chain_path
+        ]
+
+        utils.invoke_command(
+            self.logger,
+            f"Fetching trusted chain '{self.config.trusted_chain_label}' from TPP.",
+            f"Successfully fetched chain '{self.config.trusted_chain_label}' from TPP.",
+            f"Error fetching chain '{self.config.trusted_chain_label}' from TPP",
+            'cspconfig getcert',
+            print_output_on_success=False,
+            command=command,
+            env=self.session_env
+        )
+
+        utils.add_ca_cert_to_truststore(self.logger, trusted_chain_path)
 
     def _invoke_csp_config_sync(self):
         command = [
