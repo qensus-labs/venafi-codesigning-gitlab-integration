@@ -196,12 +196,10 @@ def invoke_command(logger, pre_message, success_message, error_message, short_cm
 
 
 def add_ca_cert_to_truststore(logger, path):
-    logger.info(f'Adding {path} to the TLS truststore')
+    logger.info(f'Adding {path} to the system truststore')
     if os.name == 'nt':
-        script = r'Import-Certificate -FilePath $env:INPUT -CertStoreLocation "Cert:\LocalMachine\root"'  # noqa: E501
         subprocess.run(
-            ['powershell', '-Command', script],
-            env={**os.environ, 'INPUT': path},
+            ['certoc', '-addstore', 'root', path],
             check=True
         )
     else:
