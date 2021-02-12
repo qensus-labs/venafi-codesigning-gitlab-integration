@@ -63,6 +63,15 @@ This product supports the following Gitlab runner executors:
  * SSH
  * Docker
 
+Executor support differs per OS:
+
+| Signer    | OS      | Shell | SSH | Docker |
+|-----------|---------|-------|-----|--------|
+| Jarsigner | Linux   | ✅    | ✅  | ✅     |
+| Jarsigner | Windows | ✅    | ❌  | ❌     |
+| Signtool  | Linux   | ❌    | ❌  | ❌     |
+| Signtool  | Windows | ✅    | ❌  | ✅     |
+
 ## Usage
 
 ### Sign with Jarsigner
