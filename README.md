@@ -31,6 +31,8 @@ This product allows one to sign and verify files through Venafi CodeSign Protect
      - [Docker executor](#docker-executor-3)
      - [Shell or SSH executor](#shell-or-ssh-executor-3)
      - [Variables](#variables-3)
+ - [Docker images](#docker-images)
+     - [Image versioning policy](#image-versioning-policy)
  - [Signtool caveats](#signtool-caveats)
  - [Contribution & development](#contribution-development)
 
@@ -81,7 +83,8 @@ This section shows how to sign one or more files with Java's [Jarsigner](https:/
 #### Docker executor
 
  * Define a job that calls `venafi-sign-jarsigner`.
- * Ensure the job operates within the image `quay.io/fullstaq-venafi-gitlab-integration/codesigning-jarsigner-x86_64`.
+ * Ensure the job operates within the image `quay.io/fullstaq-venafi-gitlab-integration/codesigning-jarsigner-x86_64:<TAG>`.
+    - Select a tag based on the Venafi client tools version that you require. See [Docker images](#docker-images).
  * Set the `INPUT_PATH` or `INPUT_GLOB` variable to the file(s) that you wish to sign.
  * Set other required variables too. See the variables reference below.
 
@@ -238,7 +241,8 @@ This section shows how to verify one or more files with Java's [Jarsigner](https
 #### Docker executor
 
  * Define a job that calls `venafi-verify-jarsigner`.
- * Ensure the job operates within the image `quay.io/fullstaq-venafi-gitlab-integration/codesigning-jarsigner-x86_64`.
+ * Ensure the job operates within the image `quay.io/fullstaq-venafi-gitlab-integration/codesigning-jarsigner-x86_64:<TAG>`.
+    - Select a tag based on the Venafi client tools version that you require. See [Docker images](#docker-images).
  * Set the `INPUT_PATH` or `INPUT_GLOB` variable to the file(s) that you wish to verify.
  * Set other required variables too. See the variables reference below.
 
@@ -360,7 +364,8 @@ Usage instructions:
 
  * Define a job that calls `venafi-sign-signtool`.
  * Ensure that this job runs on a Windows-based runner, by setting the proper tags.
- * Ensure this job operates within the image `quay.io/fullstaq-venafi-gitlab-integration/codesigning-signtool-x86_64`.
+ * Ensure this job operates within the image `quay.io/fullstaq-venafi-gitlab-integration/codesigning-signtool-x86_64:<TAG>`.
+    - Select a tag based on the Venafi client tools version that you require. See [Docker images](#docker-images).
  * Set the `INPUT_PATH` variable to a filename or a glob that you wish to sign.
  * Set other required variables too. See the variables reference below.
 
@@ -562,7 +567,8 @@ Usage instructions:
 
  * Define a job that calls `venafi-verify-signtool`.
  * Ensure that this job runs on a Windows-based runner, by setting the proper tags.
- * Ensure this job operates within the image `quay.io/fullstaq-venafi-integration/codesigning-signtool-x86_64`.
+ * Ensure this job operates within the image `quay.io/fullstaq-venafi-integration/codesigning-signtool-x86_64:<TAG>`.
+    - Select a tag based on the Venafi client tools version that you require. See [Docker images](#docker-images).
  * Set the `INPUT_PATH` variable to a filename or a glob that you wish to verify.
  * Set other required variables too. See the variables reference below.
 
@@ -691,6 +697,46 @@ Optional:
  * `SIGNTOOL_PATH`: The full path to signtool.exe. If not specified, we assume that it's in PATH.
 
  * `VENAFI_CLIENT_TOOLS_DIR`: Specifies the path to the directory in which Venafi CodeSign Protect client tools are installed. If not specified, it's autodetected from the registry. If that fails, we fallback to C:\Program Files\Venafi CodeSign Protect.
+
+## Docker images
+
+We supply a number of Docker images, for the purpose of using this Gitlab integration product with Gitlab CI's Docker executor. These images include the Venafi client tools.
+
+Images have the following address format:
+
+~~~
+quay.io/fullstaq-venafi-gitlab-integration/codesigning-<SIGNING TOOL>-<ARCHITECTURE>:<TAG>
+~~~
+
+Where:
+
+ * `SIGNING TOOL` is either `jarsigner` or `signtool`.
+ * `ARCHITECTURE` is the architecture of the node on which you plan to plan to run the container. Currently, only `x86_64` is available.
+ * `TAG` is the version that you want to use.
+
+    - Specify the `latest` tag if you want to use the latest version of this Gitlab integration product, in combination with the latest version of the Venafi client tools that we support.
+
+      Note that older TPPs may not be compatible with newer client tools. We therefore do not recommend using the `latest` tag.
+
+    - Specify `<PRODUCT VERSION>-<VENAFI CLIENT TOOLS VERSION>` as tag, if you want to have more control.
+
+       - `PRODUCT VERSION` is the version of this Gitlab integration product. See [the releases list](https://github.com/fullstaq-labs/releases) to learn which versions are available.
+
+       - `VENAFI CLIENT TOOLS VERSION` is the version of the Venafi client tools that you wish to use, for example `20.2`.
+
+For example, to select product version 1.0 + Venafi client tools 20.2, for use with Jarsigner on x86\_64:
+
+~~~
+quay.io/fullstaq-venafi-gitlab-integration/codesigning-jarsigner-x86_64:1.0-20.2
+~~~
+
+### Image versioning policy
+
+ * We always supply the latest version of Signtool.
+ * We always supply the latest version of Jarsigner, as is installable via the base image's package manager.
+    - Our Jarsigner images are currently based on CentOS 8, so we always supply the latest Jarsigner as is provided by CentOS 8's YUM repository.
+ * We supply the latest 4 minor versions of the Venafi client tools (for example: 20.2 + 20.1 + 19.5 + 19.4).
+    - For each Venafi client tools minor version, we always supply the latest patch version.
 
 ## Signtool caveats
 
