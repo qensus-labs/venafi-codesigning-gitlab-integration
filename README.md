@@ -722,12 +722,12 @@ Where:
 
        - `PRODUCT VERSION` is the version of this Gitlab integration product. See [the releases list](https://github.com/fullstaq-labs/releases) to learn which versions are available.
 
-       - `VENAFI CLIENT TOOLS VERSION` is the version of the Venafi client tools that you wish to use, for example `20.2`.
+       - `VENAFI CLIENT TOOLS VERSION` is the version of the Venafi client tools that you wish to use, for example `20.4`.
 
-For example, to select product version 1.0 + Venafi client tools 20.2, for use with Jarsigner on x86\_64:
+For example, to select product version 1.0 + Venafi client tools 20.4, for use with Jarsigner on x86\_64:
 
 ~~~
-quay.io/fullstaq-venafi-gitlab-integration/codesigning-jarsigner-x86_64:1.0-20.2
+quay.io/fullstaq-venafi-gitlab-integration/codesigning-jarsigner-x86_64:1.0-20.4
 ~~~
 
 ### Image versioning policy
@@ -735,7 +735,7 @@ quay.io/fullstaq-venafi-gitlab-integration/codesigning-jarsigner-x86_64:1.0-20.2
  * We always supply the latest version of Signtool.
  * We always supply the latest version of Jarsigner, as is installable via the base image's package manager.
     - Our Jarsigner images are currently based on CentOS 8, so we always supply the latest Jarsigner as is provided by CentOS 8's YUM repository.
- * We supply the latest 4 minor versions of the Venafi client tools (for example: 20.2 + 20.1 + 19.5 + 19.4).
+ * We supply the latest 4 minor versions of the Venafi client tools (for example: 20.4 + 20.3 + 20.2 + 20.1).
     - For each Venafi client tools minor version, we always supply the latest patch version.
 
 ## Signtool caveats
