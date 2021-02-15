@@ -81,7 +81,7 @@ This section shows how to sign one or more files with Java's [Jarsigner](https:/
 #### Docker executor
 
  * Define a job that calls `venafi-sign-jarsigner`.
- * Ensure the job operates within the image `quay.io/fullstaq-venafi-codesigning-gitlab-integration/jarsigner-x86_64`.
+ * Ensure the job operates within the image `quay.io/fullstaq-venafi-gitlab-integration/codesigning-jarsigner-x86_64`.
  * Set the `INPUT_PATH` or `INPUT_GLOB` variable to the file(s) that you wish to sign.
  * Set other required variables too. See the variables reference below.
 
@@ -105,7 +105,7 @@ build_jar:
 # then store the signed jar as an artifact.
 sign_jarsigner:
   stage: sign
-  image: quay.io/fullstaq-venafi-codesigning-gitlab-integration/jarsigner-x86_64
+  image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-jarsigner-x86_64
   script:
     - venafi-sign-jarsigner
   variables:
@@ -210,7 +210,7 @@ Optional:
 
    ~~~yaml
    sign_jarsigner:
-     image: quay.io/fullstaq-venafi-codesigning-gitlab-integration/jarsigner-x86_64
+     image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-jarsigner-x86_64
      script:
        - wget -O /downloaded-ca.crt https://internal.company.url/path-to-your-ca-chain.crt
        - venafi-sign-jarsigner
@@ -238,7 +238,7 @@ This section shows how to verify one or more files with Java's [Jarsigner](https
 #### Docker executor
 
  * Define a job that calls `venafi-verify-jarsigner`.
- * Ensure the job operates within the image `quay.io/fullstaq-venafi-codesigning-gitlab-integration/jarsigner-x86_64`.
+ * Ensure the job operates within the image `quay.io/fullstaq-venafi-gitlab-integration/codesigning-jarsigner-x86_64`.
  * Set the `INPUT_PATH` or `INPUT_GLOB` variable to the file(s) that you wish to verify.
  * Set other required variables too. See the variables reference below.
 
@@ -259,7 +259,7 @@ fetch_jar:
 # Verify 'signed.jar' that was fetched by the 'fetch' stage.
 verify_jarsigner:
   stage: verify
-  image: quay.io/fullstaq-venafi-codesigning-gitlab-integration/jarsigner-x86_64
+  image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-jarsigner-x86_64
   script:
     - venafi-verify-jarsigner
   variables:
@@ -329,7 +329,7 @@ Optional:
 
    ~~~yaml
    verify_jarsigner:
-     image: quay.io/fullstaq-venafi-codesigning-gitlab-integration/jarsigner-x86_64
+     image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-jarsigner-x86_64
      script:
        - wget -O /downloaded-ca.crt https://internal.company.url/path-to-your-ca-chain.crt
        - venafi-verify-jarsigner
@@ -360,7 +360,7 @@ Usage instructions:
 
  * Define a job that calls `venafi-sign-signtool`.
  * Ensure that this job runs on a Windows-based runner, by setting the proper tags.
- * Ensure this job operates within the image `quay.io/fullstaq-venafi-codesigning-gitlab-integration/signtool-x86_64`.
+ * Ensure this job operates within the image `quay.io/fullstaq-venafi-gitlab-integration/codesigning-signtool-x86_64`.
  * Set the `INPUT_PATH` variable to a filename or a glob that you wish to sign.
  * Set other required variables too. See the variables reference below.
 
@@ -378,7 +378,7 @@ stages:
 # Build a 'foo.exe' and pass it as an artifact to the 'sign' stage.
 build_exe:
   stage: build
-  image: quay.io/fullstaq-venafi-codesigning-gitlab-integration/signtool-x86_64
+  image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-signtool-x86_64
   tags:
     - windows
   script:
@@ -391,7 +391,7 @@ build_exe:
 # then store the signed exe as an artifact.
 sign_signtool:
   stage: sign
-  image: quay.io/fullstaq-venafi-codesigning-gitlab-integration/signtool-x86_64
+  image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-signtool-x86_64
   tags:
     - windows
   script:
@@ -562,7 +562,7 @@ Usage instructions:
 
  * Define a job that calls `venafi-verify-signtool`.
  * Ensure that this job runs on a Windows-based runner, by setting the proper tags.
- * Ensure this job operates within the image `quay.io/fullstaq-venafi-codesigning-gitlab-integration/signtool-x86_64`.
+ * Ensure this job operates within the image `quay.io/fullstaq-venafi-integration/codesigning-signtool-x86_64`.
  * Set the `INPUT_PATH` variable to a filename or a glob that you wish to verify.
  * Set other required variables too. See the variables reference below.
 
@@ -579,7 +579,7 @@ stages:
 # Fetch a signed 'signed.exe' and pass it as an artifact to the 'verify' stage.
 fetch_exe:
   stage: fetch
-  image: quay.io/fullstaq-venafi-codesigning-gitlab-integration/signtool-x86_64
+  image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-signtool-x86_64
   tags:
     - windows
   script:
@@ -591,7 +591,7 @@ fetch_exe:
 # Verify 'signed.exe' that was fetched by the 'fetch' stage.
 verify_signtool:
   stage: sign
-  image: quay.io/fullstaq-venafi-codesigning-gitlab-integration/signtool-x86_64
+  image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-signtool-x86_64
   tags:
     - windows
   script:
