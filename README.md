@@ -735,7 +735,7 @@ quay.io/fullstaq-venafi-gitlab-integration/codesigning-jarsigner-x86_64:1.0-20.4
  * We always supply the latest version of Signtool.
  * We always supply the latest version of Jarsigner, as is installable via the base image's package manager.
     - Our Jarsigner images are currently based on CentOS 8, so we always supply the latest Jarsigner as is provided by CentOS 8's YUM repository.
- * We supply the latest 4 minor versions of the Venafi client tools (for example: 20.4 + 20.3 + 20.2 + 20.1).
+ * We supply the latest 4 minor versions of the Venafi client tools, though no earlier than 20.02 (for example: 20.5 + 20.4 + 20.3 + 20.2).
     - For each Venafi client tools minor version, we always supply the latest patch version.
 
 ## Signtool caveats
