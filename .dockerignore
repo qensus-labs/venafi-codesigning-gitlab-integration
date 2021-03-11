@@ -1,6 +1,7 @@
 *.pyc
 *.class
 *.egg-info
+*.jar
 
 .editorconfig
 .git
@@ -15,3 +16,4 @@ __pycache__
 /dist
 /venv
 /test
+/integration-tests
