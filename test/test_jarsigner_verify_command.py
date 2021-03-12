@@ -66,29 +66,8 @@ def test_successful_verify_session(monkeypatch, caplog):
     assert re.search(getgrant_line, caplog.text, re.MULTILINE)
     assert 'Successfully obtained grant from TPP' in caplog.text
 
-    getcert_line = (
-        r"/pkcs11config getcertificate '--label=my cert' "
-        r"--file=.*?\.crt --chainfile=.*?\.crt$"
-    )
-    assert re.search(getcert_line, caplog.text, re.MULTILINE)
-    assert 'Successfully obtained certificate chain from TPP' in caplog.text
-
-    keytool_line = (
-        r"keytool -import -trustcacerts -file .*?/cert\.crt -alias .*?/cert\.crt "
-        r"-keystore .*?/keystore --storepass notrelevant --noprompt$"
-    )
-    assert re.search(keytool_line, caplog.text, re.MULTILINE)
-    assert "Successfully imported main certificate" in caplog.text
-
-    keytool_line = (
-        r"keytool -import -trustcacerts -file .*?/chain\..*?\.crt -alias .*?/chain\..*?\.crt "
-        r"-keystore .*?/keystore --storepass notrelevant --noprompt$"
-    )
-    assert len(re.findall(keytool_line, caplog.text, re.MULTILINE)) == 1
-    assert len(re.findall(r'Successfully imported certificate chain \[part', caplog.text)) == 1
-
     jarsigner_line = (
-        r"jarsigner -verify -verbose -keystore .*?/keystore foo\.jar$"
+        r"jarsigner -verify -verbose .*? foo\.jar$"
     )
     assert re.search(jarsigner_line, caplog.text, re.MULTILINE)
     assert "Successfully verified 'foo.jar'" in caplog.text
@@ -245,12 +224,12 @@ def test_input_glob(monkeypatch, caplog, tmpdir):
     assert len(re.findall(r'jarsigner -verify', caplog.text)) == 2
 
     jarsigner_line = (
-        r"jarsigner -verify -verbose -keystore .*?/keystore .*?/a\.jar$"
+        r"jarsigner -verify -verbose .*? .*?/a\.jar$"
     )
     assert re.search(jarsigner_line, caplog.text, re.MULTILINE)
 
     jarsigner_line = (
-        r"jarsigner -verify -verbose -keystore .*?/keystore .*?/b\.jar$"
+        r"jarsigner -verify -verbose .*? .*?/b\.jar$"
     )
     assert re.search(jarsigner_line, caplog.text, re.MULTILINE)
 

@@ -68,9 +68,8 @@ class JarsignerVerifyCommand:
         try:
             self._determine_input_paths()
             self._generate_session_id()
+            self._create_pkcs11_provider_config()
             self._login_tpp()
-            self._get_certificates()
-            self._import_certificates()
             self._invoke_jarsigner_verify()
         finally:
             self._logout_tpp()
@@ -93,14 +92,8 @@ class JarsignerVerifyCommand:
         else:
             self.input_paths = glob.glob(self.config.input_glob)
 
-    def _get_cert_file_path(self):
-        return os.path.join(self.temp_dir.name, 'cert.crt')
-
-    def _get_chain_file_path(self):
-        return os.path.join(self.temp_dir.name, 'chain.crt')
-
-    def _get_keystore_file_path(self):
-        return os.path.join(self.temp_dir.name, 'keystore')
+    def _pkcs11_provider_config_path(self):
+        return os.path.join(self.temp_dir.name, 'pkcs11-provider.conf')
 
     def _generate_session_id(self):
         if self.config.isolate_sessions:
@@ -109,6 +102,11 @@ class JarsignerVerifyCommand:
             self.logger.info(f'Session ID: {session_id}')
         else:
             self.session_env = {}
+
+    def _create_pkcs11_provider_config(self):
+        utils.create_pkcs11_provider_config(
+            self._pkcs11_provider_config_path(),
+            self.config.venafi_client_tools_dir)
 
     def _get_tpp_password(self) -> str:
         if self.config.tpp_password is not None:
@@ -173,71 +171,6 @@ class JarsignerVerifyCommand:
             # Don't reraise exception: allow temp_dir to be cleaned up
             logging.exception('Unexpected exception during TPP logout')
 
-    def _get_certificates(self):
-        utils.invoke_command(
-            self.logger,
-            'Getting certificate chain from TPP.',
-            'Successfully obtained certificate chain from TPP.',
-            'Error obtaining certificate chain from TPP',
-            'pkcs11config getcertificate',
-            print_output_on_success=False,
-            command=[
-                utils.get_pkcs11config_tool_path(
-                    self.config.venafi_client_tools_dir),
-                'getcertificate',
-                '--label=' + self.config.certificate_label,
-                '--file=' + self._get_cert_file_path(),
-                '--chainfile=' + self._get_chain_file_path()
-            ],
-            env=self.session_env
-        )
-
-    def _import_certificates(self):
-        utils.invoke_command(
-            self.logger,
-            'Importing main certificate into temporary Java key store.',
-            'Successfully imported main certificate into temporary Java key store.',
-            'Error importing main certificate into temporary Java key store',
-            'keytool -import',
-            print_output_on_success=False,
-            command=[
-                'keytool',
-                '-import',
-                '-trustcacerts',
-                '-file', self._get_cert_file_path(),
-                '-alias', self._get_cert_file_path(),
-                '-keystore', self._get_keystore_file_path(),
-                '--storepass', 'notrelevant',
-                '--noprompt'
-            ]
-        )
-
-        with open(self._get_chain_file_path(), 'r', encoding='UTF-8') as f:
-            chain_parts = utils.split_cert_chain(f.read())
-        for i, chain_part in enumerate(chain_parts):
-            chain_part_file_path = os.path.join(self.temp_dir.name, "chain.%d.crt" % (i,))
-            with open(chain_part_file_path, 'w', encoding='UTF-8') as f:
-                f.write(chain_part)
-
-            utils.invoke_command(
-                self.logger,
-                'Importing certificate chain [part %d] into temporary Java key store.' % (i,),
-                'Successfully imported certificate chain [part %d] into temporary Java key store.' % (i,),  # noqa:E501
-                'Error importing certificate chain [part %d] into temporary Java key store' % (i,),
-                'keytool -import',
-                print_output_on_success=False,
-                command=[
-                    'keytool',
-                    '-import',
-                    '-trustcacerts',
-                    '-file', chain_part_file_path,
-                    '-alias', chain_part_file_path,
-                    '-keystore', self._get_keystore_file_path(),
-                    '--storepass', 'notrelevant',
-                    '--noprompt'
-                ]
-            )
-
     def _invoke_jarsigner_verify(self):
         for input_path in self.input_paths:
             output = utils.invoke_command(
@@ -251,7 +184,12 @@ class JarsignerVerifyCommand:
                     'jarsigner',
                     '-verify',
                     '-verbose',
-                    '-keystore', self._get_keystore_file_path(),
+                    '-certs',
+                    '-providerclass', 'sun.security.pkcs11.SunPKCS11',
+                    '-providerArg', self._pkcs11_provider_config_path(),
+                    '-keystore', 'NONE',
+                    '-storetype', 'PKCS11',
+                    '-storepass', 'none',
                     input_path,
                 ]
             )

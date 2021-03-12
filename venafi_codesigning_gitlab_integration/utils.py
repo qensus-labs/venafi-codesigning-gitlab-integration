@@ -158,22 +158,6 @@ def log_subprocess_run(logger, command, masks):
     logger.info('Running: ' + shlex.join(command_to_log))
 
 
-def split_cert_chain(chain_cert_data):
-    lines = chain_cert_data.splitlines()
-    result = []
-    current_cert = []
-
-    for line in filter(lambda x: len(x) > 0, lines):
-        current_cert.append(line)
-        current_cert.append("\n")
-
-        if '-END CERTIFICATE-' in line:
-            result.append(''.join(current_cert))
-            current_cert.clear()
-
-    return result
-
-
 def invoke_command(logger, pre_message, success_message, error_message, short_cmdline,
                    print_output_on_success, command, masks=None, env=None):
     if env is not None:
