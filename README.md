@@ -720,7 +720,9 @@ Where:
 
     - Specify `<PRODUCT VERSION>-<VENAFI CLIENT TOOLS VERSION>` as tag, if you want to have more control.
 
-       - `PRODUCT VERSION` is the version of this Gitlab integration product. See [the releases list](https://github.com/fullstaq-labs/releases) to learn which versions are available.
+       - `PRODUCT VERSION` is the major + minor version of this Gitlab integration product. See [the releases list](https://github.com/fullstaq-labs/releases) to learn which versions are available.
+
+         We only provide images for the latest tiny version, which is why you can't specify the tiny version number in the tag. So for example, if only product versions 1.0.0 and 1.0.1 exist, we only provide an image for 1.0 (which contains product version 1.0.1).
 
        - `VENAFI CLIENT TOOLS VERSION` is the version of the Venafi client tools that you wish to use, for example `20.4`.
 
