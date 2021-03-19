@@ -6,6 +6,7 @@ with open('README.md', 'r', encoding='UTF-8') as f:
 setuptools.setup(
     name='venafi-codesigning-gitlab-integration',
     version='0.9.0',
+    license='Apache 2.0',
     author='Fullstaq',
     author_email='info@fullstaq.com',
     description='Venafi CodeSign Protect: Gitlab integration',
@@ -30,7 +31,7 @@ setuptools.setup(
     ],
     classifiers=[
         'Programming Language :: Python :: 3',
-        'License :: OSI Approved :: Apache License',
+        'License :: OSI Approved :: Apache Software License',
         'Operating System :: OS Independent',
     ],
     python_requires='>=3.8',
