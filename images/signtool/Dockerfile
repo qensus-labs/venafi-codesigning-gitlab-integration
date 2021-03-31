@@ -2,6 +2,8 @@
 
 FROM mcr.microsoft.com/windows/servercore:ltsc2019
 
+ADD DOCKER-IMAGE-LICENSE.txt \license.txt
+
 # Install Signtool
 ADD images\signtool\install-signtool.ps1 \build\
 RUN powershell \build\install-signtool.ps1

@@ -1,5 +1,7 @@
 FROM centos:8
 
+ADD DOCKER-IMAGE-LICENSE.txt /license.txt
+
 RUN dnf install -y python38 java-11-openjdk-devel && \
     dnf clean all
 
