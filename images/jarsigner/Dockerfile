@@ -17,3 +17,6 @@ RUN cd /build && \
 
 ENV VENAFI_CONTAINER=true
 ENV ISOLATE_SESSIONS=false
+
+# Sanity check
+RUN venafi-version

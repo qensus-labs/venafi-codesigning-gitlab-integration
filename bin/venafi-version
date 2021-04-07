@@ -1,0 +1,8 @@
+#!/bin/sh
+set -e
+
+SELFDIR=$(dirname "$0")
+ROOTDIR=$(cd "$SELFDIR/.." && pwd)
+
+export PYTHONPATH="$ROOTDIR:$PYTHONPATH"
+exec python3 -mvenafi_codesigning_gitlab_integration.version_command "$@"

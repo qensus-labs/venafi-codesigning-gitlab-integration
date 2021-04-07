@@ -1,1 +1,2 @@
+include venafi_codesigning_gitlab_integration/support/*.txt
 include venafi_codesigning_gitlab_integration/support/java/*.class
