@@ -34,4 +34,4 @@ RUN powershell \build\install-gitlab-integration.ps1 && `
     rmdir /s /q \build
 
 # Sanity check
-RUN venafi-version.bat
+RUN venafi-version
