@@ -1,0 +1,415 @@
+name: CI/CD
+
+on:
+  push:
+    paths-ignore:
+      - CONTRIBUTING.md
+      - MAINTENANCE.md
+  workflow_dispatch:
+    inputs:
+      create_release:
+        description: 'Set to true if you want to create a release'
+        required: true
+
+env:
+  QUAY_USERNAME: fullstaq-venafi-gitlab-integration
+  PYPI_USERNAME: fullstaq-venafi-gitlab-integration
+  VENAFI_CLIENT_TOOL_VERSIONS: |
+    [
+      {
+        "venafi_major_minor_version": "20.2",
+        "venafi_patch_version": "0"
+      },
+      {
+        "venafi_major_minor_version": "20.3",
+        "venafi_patch_version": "0"
+      },
+      {
+        "venafi_major_minor_version": "20.4",
+        "venafi_patch_version": "0",
+        "is_latest_venafi_version": true
+      }
+    ]
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-20.04
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/cache@v2
+        with:
+          path: venv
+          key: test-venv-${{ hashFiles('requirements-dev.txt') }}
+
+      - name: Create virtual environment
+        run: python3 -m venv venv
+      - name: Install requirements
+        run: ./venv/bin/pip install -r requirements-dev.txt
+
+      - name: Flake8
+        run: ./venv/bin/flake8 *.py venafi_codesigning_gitlab_integration test
+      - name: Unit tests
+        run: PYTHONPATH=. ./venv/bin/pytest --color=yes
+
+      - name: Check whether version number needs bumping
+        run: |
+          TAGS=$(git tag)
+          VERSION=$(cat venafi_codesigning_gitlab_integration/support/version.txt)
+          export TAGS
+          export VERSION
+          python -c "$SCRIPT"
+        env:
+          SCRIPT: |
+            import os
+            if os.getenv('VERSION') in os.getenv('TAGS').splitlines():
+              print("ERROR: please bump venafi_codesigning_gitlab_integration/support/version.txt")
+              exit(1)
+            else:
+              print("All is fine")
+
+      - name: Set build matrix
+        id: set-matrix
+        run: |
+          MATRIX_COMPACT_JSON=$(jq -c <<<"$VENAFI_CLIENT_TOOL_VERSIONS")
+          echo "::set-output name=matrix::${MATRIX_COMPACT_JSON}"
+
+
+  build_source_distro:
+    name: Build source distribution
+    runs-on: ubuntu-20.04
+    needs: test
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build source distribution
+        run: python3 setup.py sdist
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: source-distribution
+          path: dist/*.tar.gz
+
+
+  build_jarsigner_image:
+    name: Build Jarsigner image
+    runs-on: ubuntu-20.04
+    needs: test
+    strategy:
+      matrix:
+        include: ${{ fromJSON(needs.test.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Read product version
+        run: >
+          cat venafi_codesigning_gitlab_integration/support/version.txt
+          | awk '{ split($0, a, "."); print "PRODUCT_MAJOR_MINOR_VERSION=" a[1] "." a[2] }'
+          >> "$GITHUB_ENV"
+
+      - name: Download Venafi client tools
+        run: >
+          curl -fsSL
+          -o venafi-codesigningclients-linux-x86_64.rpm
+          "https://fsvenafigitlabcicd.blob.core.windows.net/venafi-client-tools/${SUBDIR}/venafi-codesigningclients-linux-x86_64.rpm?${AZURE_STORAGE_SAS}"
+        env:
+          SUBDIR: ${{ matrix.venafi_major_minor_version }}.${{ matrix.venafi_patch_version }}
+          AZURE_STORAGE_SAS: ${{ secrets.VENAFI_CLIENT_TOOLS_STORAGE_ACCESS_KEY }}
+
+      - name: Login to Quay.io
+        run: docker login -u "${QUAY_USERNAME}" --password-stdin quay.io <<<"${QUAY_PASSWORD}"
+        env:
+          QUAY_PASSWORD: ${{ secrets.QUAY_DOCKER_PASSWORD }}
+
+      - name: Build image
+        run: >
+          docker build
+          --pull
+          --cache-from "quay.io/${QUAY_USERNAME}/cache_codesigning-jarsigner:${{ matrix.venafi_major_minor_version }}-x86_64"
+          --build-arg BUILDKIT_INLINE_CACHE=1
+          -f images/jarsigner/Dockerfile
+          -t jarsigner_image
+          .
+        env:
+          DOCKER_BUILDKIT: '1'
+
+      - name: Upload artifact
+        run: |
+          IMAGE_NAME="quay.io/${QUAY_USERNAME}/ci-artifact_codesigning-jarsigner:cirun${{ github.run_number }}-${{ matrix.venafi_major_minor_version }}-x86_64"
+          docker tag jarsigner_image "$IMAGE_NAME"
+          docker push "$IMAGE_NAME"
+
+      - name: Update cache
+        run: |
+          IMAGE_NAME="quay.io/${QUAY_USERNAME}/cache_codesigning-jarsigner:${{ matrix.venafi_major_minor_version }}-x86_64"
+          docker tag jarsigner_image "$IMAGE_NAME"
+          docker push "$IMAGE_NAME"
+
+
+  build_signtool_image:
+    name: Build Signtool image
+    runs-on: windows-2019
+    needs: test
+    strategy:
+      matrix:
+        include: ${{ fromJSON(needs.test.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Read product version
+        run: |
+          $contents = Get-Content venafi_codesigning_gitlab_integration\support\version.txt
+          $components = $contents.Split(".")
+          $var = "PRODUCT_MAJOR_MINOR_VERSION=$($components[0]).$($components[1])"
+          echo "Setting environment variable: $($var)"
+          echo $var >> $env:GITHUB_ENV
+
+      - name: Download Venafi client tools
+        run: >
+          Invoke-WebRequest
+          -OutFile VenafiCodeSigningClients-x64.msi
+          -Uri "https://fsvenafigitlabcicd.blob.core.windows.net/venafi-client-tools/$($env:SUBDIR)/VenafiCodeSigningClients-x64.msi?$($env:AZURE_STORAGE_SAS)"
+        env:
+          SUBDIR: ${{ matrix.venafi_major_minor_version }}.${{ matrix.venafi_patch_version }}
+          AZURE_STORAGE_SAS: ${{ secrets.VENAFI_CLIENT_TOOLS_STORAGE_ACCESS_KEY }}
+
+      - name: Login to Quay.io
+        run: >
+          echo $env:QUAY_PASSWORD |
+          docker login -u $env:QUAY_USERNAME --password-stdin quay.io
+        env:
+          QUAY_PASSWORD: ${{ secrets.QUAY_DOCKER_PASSWORD }}
+
+      - name: Build image
+        run: >
+          docker build
+          --pull
+          -f images/signtool/Dockerfile
+          -t signtool_image
+          .
+
+      - name: Upload artifact
+        run: |
+          $image_name = "quay.io/$($env:QUAY_USERNAME)/ci-artifact_codesigning-signtool:cirun${{ github.run_number }}-${{ matrix.venafi_major_minor_version }}-x86_64"
+          docker tag signtool_image $image_name
+          if ($LastExitCode -ne 0) {
+            exit 1
+          }
+          docker push $image_name
+
+
+  publish_jarsigner_image:
+    name: Publish Jarsigner image
+    runs-on: ubuntu-20.04
+    needs:
+      - test
+      - build_source_distro
+      - build_jarsigner_image
+      - build_signtool_image
+    strategy:
+      matrix:
+        include: ${{ fromJSON(needs.test.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Read product version
+        run: >
+          cat venafi_codesigning_gitlab_integration/support/version.txt
+          | awk '{ split($0, a, "."); print "PRODUCT_MAJOR_MINOR_VERSION=" a[1] "." a[2] }'
+          >> "$GITHUB_ENV"
+
+      - name: Login to Quay.io
+        run: docker login -u "${QUAY_USERNAME}" --password-stdin quay.io <<<"${QUAY_PASSWORD}"
+        env:
+          QUAY_PASSWORD: ${{ secrets.QUAY_DOCKER_PASSWORD }}
+
+
+      - name: Download image artifact
+        run: docker pull "quay.io/${QUAY_USERNAME}/ci-artifact_codesigning-jarsigner:cirun${{ github.run_number }}-${{ matrix.venafi_major_minor_version }}-x86_64"
+
+      - name: Determine image tag names
+        run: |
+          echo ARTIFACT_IMAGE_NAME="quay.io/${QUAY_USERNAME}/ci-artifact_codesigning-jarsigner:cirun${{ github.run_number }}-${{ matrix.venafi_major_minor_version }}-x86_64" >> "$GITHUB_ENV"
+          echo VERSIONED_IMAGE_NAME="quay.io/${QUAY_USERNAME}/codesigning-jarsigner:${PRODUCT_MAJOR_MINOR_VERSION}-${{ matrix.venafi_major_minor_version }}-x86_64" >> "$GITHUB_ENV"
+          echo LATEST_IMAGE_NAME="quay.io/${QUAY_USERNAME}/codesigning-jarsigner:latest-x86_64" >> "$GITHUB_ENV"
+
+      - name: Set image tags
+        run: |
+          echo "### Tagging $VERSIONED_IMAGE_NAME"
+          docker tag "$ARTIFACT_IMAGE_NAME" "$VERSIONED_IMAGE_NAME"
+
+          if [[ "$IS_LATEST_VENAFI_VERSION" = true ]]; then
+            echo "### Tagging $LATEST_IMAGE_NAME"
+            docker tag "$ARTIFACT_IMAGE_NAME" "$LATEST_IMAGE_NAME"
+          fi
+        env:
+          IS_LATEST_VENAFI_VERSION: ${{ matrix.is_latest_venafi_version }}
+
+      - name: Publish image and tags
+        run: |
+          echo "### Pushing versioned image"
+          docker push "$VERSIONED_IMAGE_NAME"
+
+          if [[ "$IS_LATEST_VENAFI_VERSION" = true ]]; then
+            echo
+            echo "### Pushing latest image"
+            docker push "$LATEST_IMAGE_NAME"
+          fi
+        if: github.event.inputs.create_release == 'true'
+        env:
+          IS_LATEST_VENAFI_VERSION: ${{ matrix.is_latest_venafi_version }}
+
+
+  publish_signtool_image:
+    name: Publish Signtool image
+    runs-on: windows-2019
+    needs:
+      - test
+      - build_source_distro
+      - build_jarsigner_image
+      - build_signtool_image
+    strategy:
+      matrix:
+        include: ${{ fromJSON(needs.test.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Read product version
+        run: |
+          $contents = Get-Content venafi_codesigning_gitlab_integration\support\version.txt
+          $components = $contents.Split(".")
+          $var = "PRODUCT_MAJOR_MINOR_VERSION=$($components[0]).$($components[1])"
+          echo "Setting environment variable: $($var)"
+          echo $var >> $env:GITHUB_ENV
+
+      - name: Login to Quay.io
+        run: >
+          echo $env:QUAY_PASSWORD |
+          docker login -u $env:QUAY_USERNAME --password-stdin quay.io
+        env:
+          QUAY_PASSWORD: ${{ secrets.QUAY_DOCKER_PASSWORD }}
+
+
+      - name: Download image artifact
+        run: docker pull "quay.io/$($env:QUAY_USERNAME)/ci-artifact_codesigning-signtool:cirun${{ github.run_number }}-${{ matrix.venafi_major_minor_version }}-x86_64"
+
+      - name: Determine image tag names
+        run: |
+          echo "ARTIFACT_IMAGE_NAME=quay.io/$($env:QUAY_USERNAME)/ci-artifact_codesigning-signtool:cirun${{ github.run_number }}-${{ matrix.venafi_major_minor_version }}-x86_64" >> $env:GITHUB_ENV
+          echo "VERSIONED_IMAGE_NAME=quay.io/$($env:QUAY_USERNAME)/codesigning-signtool:$($env:PRODUCT_MAJOR_MINOR_VERSION)-${{ matrix.venafi_major_minor_version }}-x86_64" >> $env:GITHUB_ENV
+          echo "LATEST_IMAGE_NAME=quay.io/$($env:QUAY_USERNAME)/codesigning-signtool:latest-x86_64" >> $env:GITHUB_ENV
+
+      - name: Set image tags
+        run: |
+          echo "### Tagging $($env:VERSIONED_IMAGE_NAME)"
+          docker tag $env:ARTIFACT_IMAGE_NAME $env:VERSIONED_IMAGE_NAME
+          if ($LastExitCode -ne 0) {
+            exit 1
+          }
+
+          if ($env:IS_LATEST_VENAFI_VERSION -eq 'true') {
+            echo "### Tagging $($env:LATEST_IMAGE_NAME)"
+            docker tag $env:ARTIFACT_IMAGE_NAME $env:LATEST_IMAGE_NAME
+            if ($LastExitCode -ne 0) {
+              exit 1
+            }
+          }
+        env:
+          IS_LATEST_VENAFI_VERSION: ${{ matrix.is_latest_venafi_version }}
+
+      - name: Publish image and tags
+        run: |
+          echo "### Pushing versioned image"
+          docker push $env:VERSIONED_IMAGE_NAME
+          if ($LastExitCode -ne 0) {
+            exit 1
+          }
+
+          if ($env:IS_LATEST_VENAFI_VERSION -eq 'true') {
+            echo "### Pushing latest image"
+            docker push $env:LATEST_IMAGE_NAME
+            if ($LastExitCode -ne 0) {
+              exit 1
+            }
+          }
+        if: github.event.inputs.create_release == 'true'
+        env:
+          IS_LATEST_VENAFI_VERSION: ${{ matrix.is_latest_venafi_version }}
+
+
+  publish_pypi:
+    name: Publish PyPI
+    runs-on: ubuntu-20.04
+    needs:
+      - test
+      - build_source_distro
+      - build_jarsigner_image
+      - build_signtool_image
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/cache@v2
+        with:
+          path: venv
+          key: publish-venv-${{ hashFiles('requirements-publish.txt') }}
+      - name: Create virtual environment
+        run: python3 -m venv venv
+      - name: Install requirements
+        run: ./venv/bin/pip install -r requirements-publish.txt
+      - name: Download source distribution
+        uses: actions/download-artifact@v2
+        with:
+          name: source-distribution
+          path: dist
+      - name: Twine upload
+        run: ./venv/bin/twine upload --non-interactive dist/*
+        if: github.event.inputs.create_release == 'true'
+        env:
+          TWINE_USERNAME: ${{ env.PYPI_USERNAME }}
+          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+
+
+  create_release:
+    name: Create release
+    runs-on: ubuntu-20.04
+    needs:
+      - test
+      - build_source_distro
+      - build_jarsigner_image
+      - build_signtool_image
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Fetch tags
+        run: git fetch --tags
+
+      - name: Determine changelog
+        run: |
+          MERGE_BASE=$(git merge-base origin/main HEAD)
+          echo "Merge base: $MERGE_BASE"
+
+          if PREVIOUS_RELEASE_TAG=$(git describe "$MERGE_BASE" --tags --abbrev=0 --match='v*' 2>/dev/null); then
+            echo "Previous release: $PREVIOUS_RELEASE_TAG"
+            git log --pretty='format:%s' "$PREVIOUS_RELEASE_TAG..HEAD" | sed -E 's|(.*)| * \1|' > changelog.txt
+          else
+            echo "No previous release found"
+            git log --pretty='format:%s' | sed -E 's|(.*)| * \1|' > changelog.txt
+          fi
+
+          echo
+          echo "## Changelog"
+          cat changelog.txt
+
+      - name: Create tag
+        run: |
+          set -x
+          git tag "v${PRODUCT_VERSION}"
+          git push origin "v${PRODUCT_VERSION}"
+        if: github.event.inputs.create_release == 'true'
+
+      - name: Create draft release
+        run: gh release create "v${PRODUCT_VERSION}" --draft --notes-file changelog.txt --title "Version $PRODUCT_VERSION"
+        if: github.event.inputs.create_release == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

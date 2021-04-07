@@ -5,7 +5,7 @@ ADD DOCKER-IMAGE-LICENSE.txt /license.txt
 RUN dnf install -y python38 java-11-openjdk-devel && \
     dnf clean all
 
-ADD venafi-codesigningclients-20.2.0-linux-x86_64.rpm /build/
+ADD venafi-codesigningclients-linux-x86_64.rpm /build/
 RUN dnf install -y /build/*.rpm && \
     rm -f /build/*.rpm
 
