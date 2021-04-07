@@ -1,5 +1,4 @@
 *.pyc
-*.class
 *.egg-info
 
 .DS_Store
