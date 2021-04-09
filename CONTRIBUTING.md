@@ -11,3 +11,7 @@ Install the development dependencies as follows:
 ~~~
 pip install -r requirements-dev.txt
 ~~~
+
+## Maintenance guide
+
+See also the [maintenance guide](MAINTENANCE.md) for common maintenance procedures.
