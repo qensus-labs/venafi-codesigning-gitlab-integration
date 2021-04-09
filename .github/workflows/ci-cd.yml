@@ -3,8 +3,8 @@ name: CI/CD
 on:
   push:
     paths-ignore:
-      - CONTRIBUTING.md
-      - MAINTENANCE.md
+      - '*.md'
+      - LICENSE.txt
   workflow_dispatch:
     inputs:
       create_release:
