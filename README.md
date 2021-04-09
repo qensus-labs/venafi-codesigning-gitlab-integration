@@ -83,7 +83,7 @@ This section shows how to sign one or more files with Java's [Jarsigner](https:/
 #### Docker executor
 
  * Define a job that calls `venafi-sign-jarsigner`.
- * Ensure the job operates within the image `quay.io/fullstaq-venafi-gitlab-integration/codesigning-jarsigner-x86_64:<TAG>`.
+ * Ensure the job operates within the image `quay.io/fullstaq-venafi-gitlab-integration/codesigning-jarsigner:<TAG>`.
     - Select a tag based on the Venafi client tools version that you require. See [Docker images](#docker-images).
  * Set the `INPUT_PATH` or `INPUT_GLOB` variable to the file(s) that you wish to sign.
  * Set other required variables too. See the variables reference below.
@@ -108,7 +108,7 @@ build_jar:
 # then store the signed jar as an artifact.
 sign_jarsigner:
   stage: sign
-  image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-jarsigner-x86_64
+  image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-jarsigner:latest-latest-x86_64
   script:
     - venafi-sign-jarsigner
   variables:
@@ -213,7 +213,7 @@ Optional:
 
    ~~~yaml
    sign_jarsigner:
-     image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-jarsigner-x86_64
+     image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-jarsigner:latest-latest-x86_64
      script:
        - wget -O /downloaded-ca.crt https://internal.company.url/path-to-your-ca-chain.crt
        - venafi-sign-jarsigner
@@ -241,7 +241,7 @@ This section shows how to verify one or more files with Java's [Jarsigner](https
 #### Docker executor
 
  * Define a job that calls `venafi-verify-jarsigner`.
- * Ensure the job operates within the image `quay.io/fullstaq-venafi-gitlab-integration/codesigning-jarsigner-x86_64:<TAG>`.
+ * Ensure the job operates within the image `quay.io/fullstaq-venafi-gitlab-integration/codesigning-jarsigner:<TAG>`.
     - Select a tag based on the Venafi client tools version that you require. See [Docker images](#docker-images).
  * Set the `INPUT_PATH` or `INPUT_GLOB` variable to the file(s) that you wish to verify.
  * Set other required variables too. See the variables reference below.
@@ -263,7 +263,7 @@ fetch_jar:
 # Verify 'signed.jar' that was fetched by the 'fetch' stage.
 verify_jarsigner:
   stage: verify
-  image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-jarsigner-x86_64
+  image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-jarsigner:latest-latest-x86_64
   script:
     - venafi-verify-jarsigner
   variables:
@@ -333,7 +333,7 @@ Optional:
 
    ~~~yaml
    verify_jarsigner:
-     image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-jarsigner-x86_64
+     image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-jarsigner:latest-latest-x86_64
      script:
        - wget -O /downloaded-ca.crt https://internal.company.url/path-to-your-ca-chain.crt
        - venafi-verify-jarsigner
@@ -364,7 +364,7 @@ Usage instructions:
 
  * Define a job that calls `venafi-sign-signtool`.
  * Ensure that this job runs on a Windows-based runner, by setting the proper tags.
- * Ensure this job operates within the image `quay.io/fullstaq-venafi-gitlab-integration/codesigning-signtool-x86_64:<TAG>`.
+ * Ensure this job operates within the image `quay.io/fullstaq-venafi-gitlab-integration/codesigning-signtool:<TAG>`.
     - Select a tag based on the Venafi client tools version that you require. See [Docker images](#docker-images).
  * Set the `INPUT_PATH` variable to a filename or a glob that you wish to sign.
  * Set other required variables too. See the variables reference below.
@@ -383,7 +383,7 @@ stages:
 # Build a 'foo.exe' and pass it as an artifact to the 'sign' stage.
 build_exe:
   stage: build
-  image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-signtool-x86_64
+  image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-signtool:latest-latest-x86_64
   tags:
     - windows
   script:
@@ -396,7 +396,7 @@ build_exe:
 # then store the signed exe as an artifact.
 sign_signtool:
   stage: sign
-  image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-signtool-x86_64
+  image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-signtool:latest-latest-x86_64
   tags:
     - windows
   script:
@@ -567,7 +567,7 @@ Usage instructions:
 
  * Define a job that calls `venafi-verify-signtool`.
  * Ensure that this job runs on a Windows-based runner, by setting the proper tags.
- * Ensure this job operates within the image `quay.io/fullstaq-venafi-integration/codesigning-signtool-x86_64:<TAG>`.
+ * Ensure this job operates within the image `quay.io/fullstaq-venafi-integration/codesigning-signtool:<TAG>`.
     - Select a tag based on the Venafi client tools version that you require. See [Docker images](#docker-images).
  * Set the `INPUT_PATH` variable to a filename or a glob that you wish to verify.
  * Set other required variables too. See the variables reference below.
@@ -585,7 +585,7 @@ stages:
 # Fetch a signed 'signed.exe' and pass it as an artifact to the 'verify' stage.
 fetch_exe:
   stage: fetch
-  image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-signtool-x86_64
+  image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-signtool:latest-latest-x86_64
   tags:
     - windows
   script:
@@ -597,7 +597,7 @@ fetch_exe:
 # Verify 'signed.exe' that was fetched by the 'fetch' stage.
 verify_signtool:
   stage: sign
-  image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-signtool-x86_64
+  image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-signtool:latest-latest-x86_64
   tags:
     - windows
   script:
@@ -705,20 +705,19 @@ We supply a number of Docker images, for the purpose of using this Gitlab integr
 Images have the following address format:
 
 ~~~
-quay.io/fullstaq-venafi-gitlab-integration/codesigning-<SIGNING TOOL>-<ARCHITECTURE>:<TAG>
+quay.io/fullstaq-venafi-gitlab-integration/codesigning-<SIGNING TOOL>:<TAG>
 ~~~
 
 Where:
 
  * `SIGNING TOOL` is either `jarsigner` or `signtool`.
- * `ARCHITECTURE` is the architecture of the node on which you plan to plan to run the container. Currently, only `x86_64` is available.
- * `TAG` is the version that you want to use.
+ * `TAG` specifies the version components and architecture that you want to use. This is in the format of:
 
-    - Specify the `latest` tag if you want to use the latest version of this Gitlab integration product, in combination with the latest version of the Venafi client tools that we support.
+    - Specify the `latest-<ARCHITECTURE>` tag if you want to use the latest version of this Gitlab integration product, in combination with the latest version of the Venafi client tools that we support.
 
-      Note that older TPPs may not be compatible with newer client tools. We therefore do not recommend using the `latest` tag.
+      Note that older TPPs may not be compatible with newer client tools. We therefore do not recommend using `latest`.
 
-    - Specify `<PRODUCT VERSION>-<VENAFI CLIENT TOOLS VERSION>` as tag, if you want to have more control.
+    - Specify `<PRODUCT VERSION>-<VENAFI CLIENT TOOLS VERSION>-<ARCHITECTURE>` as tag, if you want to have more control.
 
        - `PRODUCT VERSION` is the major + minor version of this Gitlab integration product. See [the releases list](https://github.com/fullstaq-labs/venafi-codesigning-gitlab-integration/releases) to learn which versions are available.
 
@@ -726,10 +725,12 @@ Where:
 
        - `VENAFI CLIENT TOOLS VERSION` is the version of the Venafi client tools that you wish to use, for example `20.4`.
 
+    - `ARCHITECTURE` is the architecture of the node on which you plan to run the container. Currently, only `x86_64` is available.
+
 For example, to select product version 1.0 + Venafi client tools 20.4, for use with Jarsigner on x86\_64:
 
 ~~~
-quay.io/fullstaq-venafi-gitlab-integration/codesigning-jarsigner-x86_64:1.0-20.4
+quay.io/fullstaq-venafi-gitlab-integration/codesigning-jarsigner:1.0-20.4-x86_64
 ~~~
 
 ### Image versioning policy
