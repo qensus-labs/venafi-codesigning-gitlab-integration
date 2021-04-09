@@ -383,6 +383,10 @@ jobs:
           fetch-depth: 0
       - name: Fetch tags
         run: git fetch --tags
+      - name: Read product version
+        run: |
+          VERSION=$(cat venafi_codesigning_gitlab_integration/support/version.txt)
+          echo "PRODUCT_VERSION=$VERSION" >> "$GITHUB_ENV"
 
       - name: Determine changelog
         run: |
