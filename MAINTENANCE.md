@@ -22,4 +22,4 @@
 
  4. [Manually run the "CI/CD" workflow](https://github.com/fullstaq-labs/venafi-codesigning-gitlab/actions/workflows/ci-cd.yml). Set the `create_release` parameter to `true`. Wait until it finishes. This creates a draft release.
 
- 5. Edit the draft release's notes and finalize the release.
+ 5. Edit [the draft release](https://github.com/fullstaq-labs/venafi-codesigning-gitlab/releases)'s notes and finalize the release.
