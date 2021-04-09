@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       create_release:
-        description: 'Set to true if you want to create a release'
+        description: 'Create a release? Set to true'
         required: true
 
 env:
