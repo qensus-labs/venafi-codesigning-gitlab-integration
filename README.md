@@ -727,10 +727,16 @@ Where:
 
     - `ARCHITECTURE` is the architecture of the node on which you plan to run the container. Currently, only `x86_64` is available.
 
-For example, to select product version 1.0 + Venafi client tools 20.4, for use with Jarsigner on x86\_64:
+Example: product version 1.0 + Venafi client tools 20.4, for use with Jarsigner on x86\_64:
 
 ~~~
 quay.io/fullstaq-venafi-gitlab-integration/codesigning-jarsigner:1.0-20.4-x86_64
+~~~
+
+Example: latest product version + latest Venafi client tools, for use with Signtool on x86\_64:
+
+~~~
+quay.io/fullstaq-venafi-gitlab-integration/codesigning-signtool:latest-x86_64
 ~~~
 
 ### Image versioning policy
