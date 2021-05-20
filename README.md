@@ -108,7 +108,7 @@ build_jar:
 # then store the signed jar as an artifact.
 sign_jarsigner:
   stage: sign
-  image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-jarsigner:latest-latest-x86_64
+  image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-jarsigner:latest-x86_64
   script:
     - venafi-sign-jarsigner
   variables:
@@ -213,7 +213,7 @@ Optional:
 
    ~~~yaml
    sign_jarsigner:
-     image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-jarsigner:latest-latest-x86_64
+     image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-jarsigner:latest-x86_64
      script:
        - wget -O /downloaded-ca.crt https://internal.company.url/path-to-your-ca-chain.crt
        - venafi-sign-jarsigner
@@ -263,7 +263,7 @@ fetch_jar:
 # Verify 'signed.jar' that was fetched by the 'fetch' stage.
 verify_jarsigner:
   stage: verify
-  image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-jarsigner:latest-latest-x86_64
+  image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-jarsigner:latest-x86_64
   script:
     - venafi-verify-jarsigner
   variables:
@@ -333,7 +333,7 @@ Optional:
 
    ~~~yaml
    verify_jarsigner:
-     image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-jarsigner:latest-latest-x86_64
+     image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-jarsigner:latest-x86_64
      script:
        - wget -O /downloaded-ca.crt https://internal.company.url/path-to-your-ca-chain.crt
        - venafi-verify-jarsigner
@@ -383,7 +383,7 @@ stages:
 # Build a 'foo.exe' and pass it as an artifact to the 'sign' stage.
 build_exe:
   stage: build
-  image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-signtool:latest-latest-x86_64
+  image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-signtool:latest-x86_64
   tags:
     - windows
   script:
@@ -396,7 +396,7 @@ build_exe:
 # then store the signed exe as an artifact.
 sign_signtool:
   stage: sign
-  image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-signtool:latest-latest-x86_64
+  image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-signtool:latest-x86_64
   tags:
     - windows
   script:
@@ -585,7 +585,7 @@ stages:
 # Fetch a signed 'signed.exe' and pass it as an artifact to the 'verify' stage.
 fetch_exe:
   stage: fetch
-  image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-signtool:latest-latest-x86_64
+  image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-signtool:latest-x86_64
   tags:
     - windows
   script:
@@ -597,7 +597,7 @@ fetch_exe:
 # Verify 'signed.exe' that was fetched by the 'fetch' stage.
 verify_signtool:
   stage: sign
-  image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-signtool:latest-latest-x86_64
+  image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-signtool:latest-x86_64
   tags:
     - windows
   script:
