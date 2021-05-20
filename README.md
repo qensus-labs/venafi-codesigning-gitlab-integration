@@ -32,6 +32,7 @@ This product allows one to sign and verify files through Venafi CodeSign Protect
      - [Shell or SSH executor](#shell-or-ssh-executor-3)
      - [Variables](#variables-3)
  - [Docker images](#docker-images)
+     - [List of published Docker image tags](#list-of-published-docker-image-tags)
      - [Image versioning policy](#image-versioning-policy)
  - [Signtool caveats](#signtool-caveats)
  - [Contribution & development](#contribution-development)
@@ -738,6 +739,13 @@ Example: latest product version + latest Venafi client tools, for use with Signt
 ~~~
 quay.io/fullstaq-venafi-gitlab-integration/codesigning-signtool:latest-x86_64
 ~~~
+
+### List of published Docker image tags
+
+You can see the available tags on Quay.io:
+
+ * [codesigning-jarsigner](https://quay.io/repository/fullstaq-venafi-gitlab-integration/codesigning-jarsigner?tab=tags)
+ * [codesigning-signtool](https://quay.io/repository/fullstaq-venafi-gitlab-integration/codesigning-signtool?tab=tags)
 
 ### Image versioning policy
 
