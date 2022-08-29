@@ -4,6 +4,10 @@ FROM mcr.microsoft.com/windows/servercore:ltsc2019
 
 ADD DOCKER-IMAGE-LICENSE.txt \license.txt
 
+# Install pwsh
+ADD images\signtool\install-pwsh.ps1 \build\
+RUN powershell \build\install-pwsh.ps1
+
 # Install Signtool
 ADD images\signtool\install-signtool.ps1 \build\
 RUN powershell \build\install-signtool.ps1
