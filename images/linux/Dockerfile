@@ -4,7 +4,7 @@ ENV DEBIAN_FRONTEND noninteractive
 
 ADD DOCKER-IMAGE-LICENSE.txt /license.txt
 
-RUN apt-get update && apt-get install -y python3.10 openjdk-17-jdk alien
+RUN apt-get update && apt-get install -y python3.10 python3-distutils python3-pip python3-apt openjdk-17-jdk alien
 
 # RUN dnf install -y python38 java-11-openjdk-devel && \
 #     dnf clean all
