@@ -21,10 +21,10 @@ env:
       },
       {
         "venafi_major_minor_version": "21.4"
-      }
+      },
       {
         "venafi_major_minor_version": "22.1"
-      }
+      },
       {
         "venafi_major_minor_version": "22.2",
         "is_latest_venafi_version": true
