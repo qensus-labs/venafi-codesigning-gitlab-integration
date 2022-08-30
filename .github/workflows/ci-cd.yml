@@ -117,7 +117,7 @@ jobs:
 
       - name: Download Venafi client tools
         run: >
-          aws s3 cp "s3://venafi-csp-client/$env:SUBDIR/VenafiCodeSigningClients.rpm" .
+          aws s3 cp "s3://venafi-csp-client/${SUBDIR}/VenafiCodeSigningClients.rpm" .
           # curl -fsSL
           # -o venafi-codesigningclients-linux-x86_64.rpm
           # "https://fsvenafigitlabcicd.blob.core.windows.net/venafi-client-tools/${SUBDIR}/venafi-codesigningclients-linux-x86_64.rpm?${AZURE_STORAGE_SAS}"
