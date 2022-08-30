@@ -26,6 +26,7 @@ setuptools.setup(
         'console_scripts': [
             'venafi-version=venafi_codesigning_gitlab_integration.version_command:main',  # noqa:E501
             'venafi-container-init=venafi_codesigning_gitlab_integration.container_init_command:main',  # noqa:E501
+            'venafi-sign-gpg=venafi_codesigning_gitlab_integration.gpg_sign_command:main',  # noqa:E501
             'venafi-sign-jarsigner=venafi_codesigning_gitlab_integration.jarsigner_sign_command:main',  # noqa:E501
             'venafi-verify-jarsigner=venafi_codesigning_gitlab_integration.jarsigner_verify_command:main',  # noqa:E501
             'venafi-sign-signtool=venafi_codesigning_gitlab_integration.signtool_sign_command:main',  # noqa:E501

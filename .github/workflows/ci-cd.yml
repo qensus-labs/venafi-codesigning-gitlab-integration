@@ -17,24 +17,31 @@ env:
   VENAFI_CLIENT_TOOL_VERSIONS: |
     [
       {
-        "venafi_major_minor_version": "21.3"
-      },
-      {
-        "venafi_major_minor_version": "21.4"
-      },
-      {
-        "venafi_major_minor_version": "22.1"
-      },
-      {
         "venafi_major_minor_version": "22.2",
         "is_latest_venafi_version": true
       }
     ]
+  # VENAFI_CLIENT_TOOL_VERSIONS: |
+  #   [
+  #     {
+  #       "venafi_major_minor_version": "21.3"
+  #     },
+  #     {
+  #       "venafi_major_minor_version": "21.4"
+  #     },
+  #     {
+  #       "venafi_major_minor_version": "22.1"
+  #     },
+  #     {
+  #       "venafi_major_minor_version": "22.2",
+  #       "is_latest_venafi_version": true
+  #     }
+  #   ]
 
 jobs:
   test:
     name: Test
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
@@ -79,7 +86,7 @@ jobs:
 
   build_source_distro:
     name: Build source distribution
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: test
     steps:
       - uses: actions/checkout@v2
@@ -92,59 +99,59 @@ jobs:
           path: dist/*.tar.gz
 
 
-  # build_jarsigner_image:
-  #   name: Build Jarsigner image
-  #   runs-on: ubuntu-20.04
-  #   needs: test
-  #   strategy:
-  #     matrix:
-  #       include: ${{ fromJSON(needs.test.outputs.matrix) }}
-  #   steps:
-  #     - uses: actions/checkout@v2
+  build_linux_image:
+    name: Build Linux image
+    runs-on: ubuntu-22.04
+    needs: test
+    strategy:
+      matrix:
+        include: ${{ fromJSON(needs.test.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v2
 
-  #     - name: Read product version
-  #       run: >
-  #         cat venafi_codesigning_gitlab_integration/support/version.txt
-  #         | awk '{ split($0, a, "."); print "PRODUCT_MAJOR_MINOR_VERSION=" a[1] "." a[2] }'
-  #         >> "$GITHUB_ENV"
+      - name: Read product version
+        run: >
+          cat venafi_codesigning_gitlab_integration/support/version.txt
+          | awk '{ split($0, a, "."); print "PRODUCT_MAJOR_MINOR_VERSION=" a[1] "." a[2] }'
+          >> "$GITHUB_ENV"
 
-  #     - name: Download Venafi client tools
-  #       run: >
-  #         curl -fsSL
-  #         -o venafi-codesigningclients-linux-x86_64.rpm
-  #         "https://fsvenafigitlabcicd.blob.core.windows.net/venafi-client-tools/${SUBDIR}/venafi-codesigningclients-linux-x86_64.rpm?${AZURE_STORAGE_SAS}"
-  #       env:
-  #         SUBDIR: ${{ matrix.venafi_major_minor_version }}.${{ matrix.venafi_patch_version }}
-  #         AZURE_STORAGE_SAS: ${{ secrets.VENAFI_CLIENT_TOOLS_STORAGE_ACCESS_KEY }}
+      - name: Download Venafi client tools
+        run: >
+          aws s3 cp "s3://venafi-csp-client/$env:SUBDIR/VenafiCodeSigningClients.rpm" .
+          # curl -fsSL
+          # -o venafi-codesigningclients-linux-x86_64.rpm
+          # "https://fsvenafigitlabcicd.blob.core.windows.net/venafi-client-tools/${SUBDIR}/venafi-codesigningclients-linux-x86_64.rpm?${AZURE_STORAGE_SAS}"
+        env:
+          SUBDIR: ${{ matrix.venafi_major_minor_version }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_CLIENT_TOOLS_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_CLIENT_TOOLS_KEY}}
+          AWS_DEFAULT_REGION: us-east-1
 
-  #     - name: Login to docker.io
-  #       run: docker login -u "${DOCKER_USERNAME}" --password-stdin docker.io <<<"${QUAY_PASSWORD}"
-  #       env:
-  #         QUAY_PASSWORD: ${{ secrets.QUAY_DOCKER_PASSWORD }}
+      - name: Login to dockerhub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_LOGIN }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-  #     - name: Build image
-  #       run: >
-  #         docker build
-  #         --pull
-  #         --cache-from "docker.io/${DOCKER_USERNAME}/cache_codesigning-jarsigner:${{ matrix.venafi_major_minor_version }}-x86_64"
-  #         --build-arg BUILDKIT_INLINE_CACHE=1
-  #         -f images/jarsigner/Dockerfile
-  #         -t jarsigner_image
-  #         .
-  #       env:
-  #         DOCKER_BUILDKIT: '1'
+      - name: Build image
+        run: >
+          docker build
+          --pull
+          -f images/linux/Dockerfile
+          -t linux_image
+          .
 
-  #     - name: Upload artifact
-  #       run: |
-  #         IMAGE_NAME="docker.io/${DOCKER_USERNAME}/ci-artifact_codesigning-jarsigner:cirun${{ github.run_number }}-${{ matrix.venafi_major_minor_version }}-x86_64"
-  #         docker tag jarsigner_image "$IMAGE_NAME"
-  #         docker push "$IMAGE_NAME"
+      - name: Upload artifact
+        run: |
+          IMAGE_NAME="docker.io/${DOCKER_USERNAME}/code-signing-artifact:cirun${{ github.run_number }}-${{ matrix.venafi_major_minor_version }}-linux"
+          docker tag linux_image "$IMAGE_NAME"
+          docker push "$IMAGE_NAME"
 
-  #     - name: Update cache
-  #       run: |
-  #         IMAGE_NAME="docker.io/${DOCKER_USERNAME}/cache_codesigning-jarsigner:${{ matrix.venafi_major_minor_version }}-x86_64"
-  #         docker tag jarsigner_image "$IMAGE_NAME"
-  #         docker push "$IMAGE_NAME"
+      # - name: Update cache
+      #   run: |
+      #     IMAGE_NAME="docker.io/${DOCKER_USERNAME}/cache_codesigning-jarsigner:${{ matrix.venafi_major_minor_version }}-x86_64"
+      #     docker tag jarsigner_image "$IMAGE_NAME"
+      #     docker push "$IMAGE_NAME"
 
 
   build_signtool_image:
@@ -200,11 +207,11 @@ jobs:
 
   # publish_jarsigner_image:
   #   name: Publish Jarsigner image
-  #   runs-on: ubuntu-20.04
+  #   runs-on: ubuntu-22.04
   #   needs:
   #     - test
   #     - build_source_distro
-  #     - build_jarsigner_image
+  #     - build_linux_image
   #     - build_signtool_image
   #   strategy:
   #     matrix:
@@ -266,7 +273,7 @@ jobs:
     needs:
       - test
       - build_source_distro
-      # - build_jarsigner_image
+      # - build_linux_image
       - build_signtool_image
     strategy:
       matrix:
@@ -338,11 +345,11 @@ jobs:
 
   # publish_pypi:
   #   name: Publish PyPI
-  #   runs-on: ubuntu-20.04
+  #   runs-on: ubuntu-22.04
   #   needs:
   #     - test
   #     - build_source_distro
-  #     - build_jarsigner_image
+  #     - build_linux_image
   #     - build_signtool_image
   #   steps:
   #     - uses: actions/checkout@v2
@@ -369,11 +376,11 @@ jobs:
 
   # create_release:
   #   name: Create release
-  #   runs-on: ubuntu-20.04
+  #   runs-on: ubuntu-22.04
   #   needs:
   #     - test
   #     - build_source_distro
-  #     - build_jarsigner_image
+  #     - build_linux_image
   #     - build_signtool_image
   #   steps:
   #     - uses: actions/checkout@v2
