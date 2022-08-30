@@ -24,6 +24,7 @@ RUN cd /build && \
 
 ENV VENAFI_CONTAINER=true
 ENV ISOLATE_SESSIONS=false
+ENV GNUPGHOME=/tmp/.gnupg
 
 # Sanity check
 RUN venafi-version

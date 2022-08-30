@@ -100,23 +100,6 @@ def get_pkcs11config_tool_path(user_provided_venafi_client_tools_dir):
     else:
         return tools_dir.joinpath('bin').joinpath('pkcs11config')
 
-
-def get_gpgconfig_tool_path(user_provided_venafi_client_tools_dir):
-    tools_dir = detect_venafi_client_tools_dir(user_provided_venafi_client_tools_dir)
-    if os.name == 'nt':
-        # The Venafi PKCS11 driver stores credentials in the Windows registry.
-        # 32-bit and 64-bit executables have access to different Windows registry hives,
-        # so we need to make sure that the architecture of gpgconfig.exe matches that
-        # of jarsigner.exe.
-        if is_jre_64_bit():
-            exe = 'gpgconfig.exe'
-        else:
-            exe = 'gpgconfig-x86.exe'
-        return tools_dir.join_path(exe)
-    else:
-        return tools_dir.joinpath('bin').joinpath('gpgconfig')
-
-
 def get_pkcs11_driver_library_path(user_provided_venafi_client_tools_dir):
     tools_dir = detect_venafi_client_tools_dir(user_provided_venafi_client_tools_dir)
     if os.name == 'nt':
@@ -141,6 +124,10 @@ def create_pkcs11_provider_config(path, user_provided_venafi_client_tools_dir):
             slot = 0
             """ % (json.dumps(str(libpath)),)
         ).lstrip())
+
+
+def get_gpgconfig_tool_path(user_provided_venafi_client_tools_dir):
+    return pathlib.Path('/usr/local').joinpath('bin').joinpath('gpgconfig')
 
 
 def get_cspconfig_tool_path(user_provided_venafi_client_tools_dir):

@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import pathlib
 from typing import List
 from venafi_codesigning_gitlab_integration import utils
 import envparse
@@ -10,6 +11,7 @@ import base64
 import glob
 import secrets
 import random
+import shutil
 
 config_schema = dict(
     TPP_AUTH_URL=str,
@@ -17,6 +19,7 @@ config_schema = dict(
     TPP_USERNAME=str,
     TPP_PASSWORD=dict(cast=str, default=None),
     TPP_PASSWORD_BASE64=dict(cast=str, default=None),
+    GNUPGHOME=str,
 
     CERTIFICATE_LABEL=str,
     INPUT_PATH=dict(cast=str, default=None),
@@ -36,6 +39,7 @@ class GpgSignConfig:
     tpp_hsm_url: str
     tpp_username: str
     certificate_label: str
+    gnupghome: str
 
     tpp_password: str = None
     tpp_password_base64: str = None
@@ -69,13 +73,12 @@ class GpgSignCommand:
 
     def run(self):
         self._maybe_add_extra_trusted_tls_ca_certs()
-        self._create_temp_dir()
         try:
             self._determine_input_paths()
             self._generate_session_id()
-            self._create_gpg_provider_config()
             self._login_tpp()
-            self._invoke_jarsigner()
+            self._sync_tpp()
+            self._invoke_gpg()
         finally:
             self._logout_tpp()
             self._delete_temp_dir()
@@ -84,12 +87,8 @@ class GpgSignCommand:
         if self.config.extra_trusted_tls_ca_certs is not None:
             utils.add_ca_cert_to_truststore(self.logger, self.config.extra_trusted_tls_ca_certs)
 
-    def _create_temp_dir(self):
-        self.temp_dir = tempfile.TemporaryDirectory()
-
     def _delete_temp_dir(self):
-        if hasattr(self, 'temp_dir'):
-            self.temp_dir.cleanup()
+        shutil.rmtree(self.config.gnupghome)
 
     def _determine_input_paths(self) -> List[str]:
         if self.config.input_path is not None:
@@ -104,14 +103,6 @@ class GpgSignCommand:
             self.logger.info(f'Session ID: {session_id}')
         else:
             self.session_env = {}
-
-    def _create_gpg_provider_config(self):
-        utils.create_gpg_provider_config(
-            self._gpg_provider_config_path(),
-            self.config.venafi_client_tools_dir)
-
-    def _gpg_provider_config_path(self) -> str:
-        return os.path.join(self.temp_dir.name, 'gpg-provider.conf')
 
     def _get_tpp_password(self) -> str:
         if self.config.tpp_password is not None:
@@ -158,7 +149,7 @@ class GpgSignCommand:
                 'Logging out of TPP: revoking server grant.',
                 'Successfully revoked server grant.',
                 'Error revoking grant from TPP',
-                'pkcs11config revokegrant',
+                'gpgconfig revokegrant',
                 print_output_on_success=False,
                 command=[
                     utils.get_gpgconfig_tool_path(
@@ -176,7 +167,24 @@ class GpgSignCommand:
             # Don't reraise exception: allow temp_dir to be cleaned up
             logging.exception('Unexpected exception during TPP logout')
 
-    def _invoke_jarsigner(self):
+    def _sync_tpp(self):
+            utils.invoke_command(
+                self.logger,
+                'Syncing',
+                'Successfully synched',
+                'Error syncing from TPP',
+                'gpgconfig sync',
+                print_output_on_success=False,
+                command=[
+                    utils.get_gpgconfig_tool_path(
+                        self.config.venafi_client_tools_dir),
+                    'sync',
+                    '--verbose'
+                ],
+                env=self.session_env
+            )
+
+    def _invoke_gpg(self):
         for input_path in self.input_paths:
             command = [
                 'gpg',
