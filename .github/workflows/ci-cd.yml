@@ -166,6 +166,7 @@ jobs:
           SUBDIR: ${{ matrix.venafi_major_minor_version }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_CLIENT_TOOLS_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_CLIENT_TOOLS_KEY}}
+          AWS_DEFAULT_REGION: us-east-1
           # SUBDIR: ${{ matrix.venafi_major_minor_version }}.${{ matrix.venafi_patch_version }}
           # AZURE_STORAGE_SAS: ${{ secrets.VENAFI_CLIENT_TOOLS_STORAGE_ACCESS_KEY }}
 
