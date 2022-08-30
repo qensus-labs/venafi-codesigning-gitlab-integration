@@ -18,7 +18,6 @@ RUN alien -i --scripts /build/VenafiCodeSigningClients.rpm && \
 
 ADD . /build
 RUN cd /build && \
-    python3 -m pip install --upgrade pip setuptools wheel \
     python3 setup.py install && \
     cd / && \
     rm -rf /build
