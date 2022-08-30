@@ -158,7 +158,7 @@ jobs:
 
       - name: Download Venafi client tools
         run: >
-          aws s3 cp "s3://venafi-csp-client/($env:SUBDIR)/VenafiCodeSigningClients.msi" .
+          aws s3 cp "s3://venafi-csp-client/$env:SUBDIR/VenafiCodeSigningClients.msi" .
           # Invoke-WebRequest
           # -OutFile VenafiCodeSigningClients-x64.msi
           # -Uri "https://fsvenafigitlabcicd.blob.core.windows.net/venafi-client-tools/$($env:SUBDIR)/VenafiCodeSigningClients-x64.msi?$($env:AZURE_STORAGE_SAS)"
