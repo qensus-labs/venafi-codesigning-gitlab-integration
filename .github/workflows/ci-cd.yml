@@ -17,20 +17,7 @@ env:
   VENAFI_CLIENT_TOOL_VERSIONS: |
     [
       {
-        "venafi_major_minor_version": "20.3",
-        "venafi_patch_version": "0"
-      },
-      {
-        "venafi_major_minor_version": "20.4",
-        "venafi_patch_version": "0"
-      },
-      {
-        "venafi_major_minor_version": "21.1",
-        "venafi_patch_version": "0"
-      },
-      {
-        "venafi_major_minor_version": "21.2",
-        "venafi_patch_version": "0",
+        "venafi_major_minor_version": "21.3",
         "is_latest_venafi_version": true
       }
     ]
@@ -171,12 +158,16 @@ jobs:
 
       - name: Download Venafi client tools
         run: >
-          Invoke-WebRequest
-          -OutFile VenafiCodeSigningClients-x64.msi
-          -Uri "https://fsvenafigitlabcicd.blob.core.windows.net/venafi-client-tools/$($env:SUBDIR)/VenafiCodeSigningClients-x64.msi?$($env:AZURE_STORAGE_SAS)"
+          aws s3 cp s3://venafi-csp-client/($env:SUBDIR)/VenafiCodeSigningClients.msi
+          # Invoke-WebRequest
+          # -OutFile VenafiCodeSigningClients-x64.msi
+          # -Uri "https://fsvenafigitlabcicd.blob.core.windows.net/venafi-client-tools/$($env:SUBDIR)/VenafiCodeSigningClients-x64.msi?$($env:AZURE_STORAGE_SAS)"
         env:
-          SUBDIR: ${{ matrix.venafi_major_minor_version }}.${{ matrix.venafi_patch_version }}
-          AZURE_STORAGE_SAS: ${{ secrets.VENAFI_CLIENT_TOOLS_STORAGE_ACCESS_KEY }}
+          SUBDIR: ${{ matrix.venafi_major_minor_version }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_CLIENT_TOOLS_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_CLIENT_TOOLS_KEY}}
+          # SUBDIR: ${{ matrix.venafi_major_minor_version }}.${{ matrix.venafi_patch_version }}
+          # AZURE_STORAGE_SAS: ${{ secrets.VENAFI_CLIENT_TOOLS_STORAGE_ACCESS_KEY }}
 
       - name: Login to dockerhub
         uses: docker/login-action@v2
