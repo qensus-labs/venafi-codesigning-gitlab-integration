@@ -291,7 +291,7 @@ jobs:
       - name: Determine image tag names
         run: |
           echo "ARTIFACT_IMAGE_NAME=docker.io/$($env:DOCKER_USERNAME)/code-signing-artifact:cirun${{ github.run_number }}-${{ matrix.venafi_major_minor_version }}-windows" >> $env:GITHUB_ENV
-          echo "VERSIONED_IMAGE_NAME=docker.io/$($env:DOCKER_USERNAME)/code-signing:$($env:PRODUCT_MAJOR_MINOR_VERSION)-${{ matrix.venafi_major_minor_version }}-windows" >> $env:GITHUB_ENV
+          echo "VERSIONED_IMAGE_NAME=docker.io/$($env:DOCKER_USERNAME)/code-signing:${{ matrix.venafi_major_minor_version }}-windows" >> $env:GITHUB_ENV
           echo "LATEST_IMAGE_NAME=docker.io/$($env:DOCKER_USERNAME)/code-signing:latest-windows" >> $env:GITHUB_ENV
 
       - name: Set image tags
