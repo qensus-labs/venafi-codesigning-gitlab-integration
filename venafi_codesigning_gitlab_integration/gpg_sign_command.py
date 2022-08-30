@@ -1,12 +1,12 @@
 from dataclasses import dataclass
-import pathlib
+# import pathlib
 from typing import List
 from venafi_codesigning_gitlab_integration import utils
 import envparse
-import tempfile
+# import tempfile
 import logging
 import sys
-import os
+# import os
 import base64
 import glob
 import secrets
@@ -168,21 +168,21 @@ class GpgSignCommand:
             logging.exception('Unexpected exception during TPP logout')
 
     def _sync_tpp(self):
-            utils.invoke_command(
-                self.logger,
-                'Syncing',
-                'Successfully synched',
-                'Error syncing from TPP',
-                'gpgconfig sync',
-                print_output_on_success=False,
-                command=[
-                    utils.get_gpgconfig_tool_path(
-                        self.config.venafi_client_tools_dir),
-                    'sync',
-                    '--verbose'
-                ],
-                env=self.session_env
-            )
+        utils.invoke_command(
+            self.logger,
+            'Syncing',
+            'Successfully synched',
+            'Error syncing from TPP',
+            'gpgconfig sync',
+            print_output_on_success=False,
+            command=[
+                utils.get_gpgconfig_tool_path(
+                    self.config.venafi_client_tools_dir),
+                'sync',
+                '--verbose'
+            ],
+            env=self.session_env
+        )
 
     def _invoke_gpg(self):
         for input_path in self.input_paths:
