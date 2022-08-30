@@ -100,6 +100,7 @@ def get_pkcs11config_tool_path(user_provided_venafi_client_tools_dir):
     else:
         return tools_dir.joinpath('bin').joinpath('pkcs11config')
 
+
 def get_pkcs11_driver_library_path(user_provided_venafi_client_tools_dir):
     tools_dir = detect_venafi_client_tools_dir(user_provided_venafi_client_tools_dir)
     if os.name == 'nt':
