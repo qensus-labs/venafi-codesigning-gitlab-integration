@@ -261,7 +261,7 @@ jobs:
     needs:
       - test
       - build_source_distro
-      - build_jarsigner_image
+      # - build_jarsigner_image
       - build_signtool_image
     strategy:
       matrix:
