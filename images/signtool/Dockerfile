@@ -18,7 +18,7 @@ ADD images\signtool\install-python.ps1 \build\
 RUN powershell \build\install-python.ps1
 
 # Install Venafi client tools
-ADD VenafiCodeSigningClients-x64.msi \build\
+ADD VenafiCodeSigningClients.msi \build\
 ADD images\signtool\install-venafi-client-tools.ps1 \build\
 RUN powershell \build\install-venafi-client-tools.ps1
 
