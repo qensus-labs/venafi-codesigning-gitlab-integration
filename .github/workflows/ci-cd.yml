@@ -286,7 +286,7 @@ jobs:
 
 
       - name: Download image artifact
-        run: docker pull "docker.io/$($env:DOCKER_USERNAME)/code-signing-artifact:cirun${{ github.run_number }}-${{ matrix.venafi_major_minor_version }}-x86_64"
+        run: docker pull "docker.io/$($env:DOCKER_USERNAME)/code-signing-artifact:cirun${{ github.run_number }}-${{ matrix.venafi_major_minor_version }}-windows"
 
       - name: Determine image tag names
         run: |
