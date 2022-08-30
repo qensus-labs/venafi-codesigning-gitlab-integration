@@ -205,66 +205,66 @@ jobs:
           docker push $image_name
 
 
-  # publish_jarsigner_image:
-  #   name: Publish Jarsigner image
-  #   runs-on: ubuntu-22.04
-  #   needs:
-  #     - test
-  #     - build_source_distro
-  #     - build_linux_image
-  #     - build_signtool_image
-  #   strategy:
-  #     matrix:
-  #       include: ${{ fromJSON(needs.test.outputs.matrix) }}
-  #   steps:
-  #     - uses: actions/checkout@v2
+  publish_linux_image:
+    name: Publish Linux image
+    runs-on: ubuntu-22.04
+    needs:
+      - test
+      - build_source_distro
+      - build_linux_image
+      - build_signtool_image
+    strategy:
+      matrix:
+        include: ${{ fromJSON(needs.test.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v2
 
-  #     - name: Read product version
-  #       run: >
-  #         cat venafi_codesigning_gitlab_integration/support/version.txt
-  #         | awk '{ split($0, a, "."); print "PRODUCT_MAJOR_MINOR_VERSION=" a[1] "." a[2] }'
-  #         >> "$GITHUB_ENV"
+      - name: Read product version
+        run: >
+          cat venafi_codesigning_gitlab_integration/support/version.txt
+          | awk '{ split($0, a, "."); print "PRODUCT_MAJOR_MINOR_VERSION=" a[1] "." a[2] }'
+          >> "$GITHUB_ENV"
 
-  #     - name: Login to docker.io
-  #       run: docker login -u "${DOCKER_USERNAME}" --password-stdin docker.io <<<"${QUAY_PASSWORD}"
-  #       env:
-  #         QUAY_PASSWORD: ${{ secrets.QUAY_DOCKER_PASSWORD }}
+      - name: Login to dockerhub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_LOGIN }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
+      - name: Download image artifact
+        run: docker pull "docker.io/${DOCKER_USERNAME}/code-signing-artifact:cirun${{ github.run_number }}-${{ matrix.venafi_major_minor_version }}-linux"
 
-  #     - name: Download image artifact
-  #       run: docker pull "docker.io/${DOCKER_USERNAME}/ci-artifact_codesigning-jarsigner:cirun${{ github.run_number }}-${{ matrix.venafi_major_minor_version }}-x86_64"
+      - name: Determine image tag names
+        run: |
+          echo ARTIFACT_IMAGE_NAME="docker.io/${DOCKER_USERNAME}/code-signing-artifact:cirun${{ github.run_number }}-${{ matrix.venafi_major_minor_version }}-linux" >> "$GITHUB_ENV"
+          echo VERSIONED_IMAGE_NAME="docker.io/${DOCKER_USERNAME}/code-signing:${{ matrix.venafi_major_minor_version }}-linux" >> "$GITHUB_ENV"
+          echo LATEST_IMAGE_NAME="docker.io/${DOCKER_USERNAME}/code-signing:latest-linux" >> "$GITHUB_ENV"
 
-  #     - name: Determine image tag names
-  #       run: |
-  #         echo ARTIFACT_IMAGE_NAME="docker.io/${DOCKER_USERNAME}/ci-artifact_codesigning-jarsigner:cirun${{ github.run_number }}-${{ matrix.venafi_major_minor_version }}-x86_64" >> "$GITHUB_ENV"
-  #         echo VERSIONED_IMAGE_NAME="docker.io/${DOCKER_USERNAME}/codesigning-jarsigner:${PRODUCT_MAJOR_MINOR_VERSION}-${{ matrix.venafi_major_minor_version }}-x86_64" >> "$GITHUB_ENV"
-  #         echo LATEST_IMAGE_NAME="docker.io/${DOCKER_USERNAME}/codesigning-jarsigner:latest-x86_64" >> "$GITHUB_ENV"
+      - name: Set image tags
+        run: |
+          echo "### Tagging $VERSIONED_IMAGE_NAME"
+          docker tag "$ARTIFACT_IMAGE_NAME" "$VERSIONED_IMAGE_NAME"
 
-  #     - name: Set image tags
-  #       run: |
-  #         echo "### Tagging $VERSIONED_IMAGE_NAME"
-  #         docker tag "$ARTIFACT_IMAGE_NAME" "$VERSIONED_IMAGE_NAME"
+          if [[ "$IS_LATEST_VENAFI_VERSION" = true ]]; then
+            echo "### Tagging $LATEST_IMAGE_NAME"
+            docker tag "$ARTIFACT_IMAGE_NAME" "$LATEST_IMAGE_NAME"
+          fi
+        env:
+          IS_LATEST_VENAFI_VERSION: ${{ matrix.is_latest_venafi_version }}
 
-  #         if [[ "$IS_LATEST_VENAFI_VERSION" = true ]]; then
-  #           echo "### Tagging $LATEST_IMAGE_NAME"
-  #           docker tag "$ARTIFACT_IMAGE_NAME" "$LATEST_IMAGE_NAME"
-  #         fi
-  #       env:
-  #         IS_LATEST_VENAFI_VERSION: ${{ matrix.is_latest_venafi_version }}
+      - name: Publish image and tags
+        run: |
+          echo "### Pushing versioned image"
+          docker push "$VERSIONED_IMAGE_NAME"
 
-  #     - name: Publish image and tags
-  #       run: |
-  #         echo "### Pushing versioned image"
-  #         docker push "$VERSIONED_IMAGE_NAME"
-
-  #         if [[ "$IS_LATEST_VENAFI_VERSION" = true ]]; then
-  #           echo
-  #           echo "### Pushing latest image"
-  #           docker push "$LATEST_IMAGE_NAME"
-  #         fi
-  #       if: github.event.inputs.create_release == 'true'
-  #       env:
-  #         IS_LATEST_VENAFI_VERSION: ${{ matrix.is_latest_venafi_version }}
+          if [[ "$IS_LATEST_VENAFI_VERSION" = true ]]; then
+            echo
+            echo "### Pushing latest image"
+            docker push "$LATEST_IMAGE_NAME"
+          fi
+        if: github.event.inputs.create_release == 'true'
+        env:
+          IS_LATEST_VENAFI_VERSION: ${{ matrix.is_latest_venafi_version }}
 
 
   publish_signtool_image:
@@ -273,7 +273,7 @@ jobs:
     needs:
       - test
       - build_source_distro
-      # - build_linux_image
+      - build_linux_image
       - build_signtool_image
     strategy:
       matrix:
@@ -294,7 +294,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_LOGIN }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-
 
       - name: Download image artifact
         run: docker pull "docker.io/$($env:DOCKER_USERNAME)/code-signing-artifact:cirun${{ github.run_number }}-${{ matrix.venafi_major_minor_version }}-windows"
