@@ -17,26 +17,19 @@ env:
   VENAFI_CLIENT_TOOL_VERSIONS: |
     [
       {
+        "venafi_major_minor_version": "21.3"
+      },
+      {
+        "venafi_major_minor_version": "21.4"
+      },
+      {
+        "venafi_major_minor_version": "22.1"
+      },
+      {
         "venafi_major_minor_version": "22.2",
         "is_latest_venafi_version": true
       }
     ]
-  # VENAFI_CLIENT_TOOL_VERSIONS: |
-  #   [
-  #     {
-  #       "venafi_major_minor_version": "21.3"
-  #     },
-  #     {
-  #       "venafi_major_minor_version": "21.4"
-  #     },
-  #     {
-  #       "venafi_major_minor_version": "22.1"
-  #     },
-  #     {
-  #       "venafi_major_minor_version": "22.2",
-  #       "is_latest_venafi_version": true
-  #     }
-  #   ]
 
 jobs:
   test:
