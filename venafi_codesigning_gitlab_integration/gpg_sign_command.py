@@ -188,10 +188,10 @@ class GpgSignCommand:
         for input_path in self.input_paths:
             command = [
                 'gpg',
+                '--yes',
                 '--output',
-                'vcert_linux.sig',
+                'gpg_sign.sig',
                 '--no-tty',
-                '--detach-sign',
                 '--default-key'
             ]
 
@@ -204,6 +204,7 @@ class GpgSignCommand:
 
             # command += self.config.extra_args
 
+            command.append('--detach-sign')
             command.append(input_path)
 
             utils.invoke_command(
