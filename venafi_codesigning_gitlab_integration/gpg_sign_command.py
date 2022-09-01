@@ -188,19 +188,19 @@ class GpgSignCommand:
         for input_path in self.input_paths:
             command = [
                 'gpg',
-                '--yes',
                 '--output',
-                'gpg_sign.sig',
+                input_path + '.sig',
                 '--no-tty',
                 '--default-key'
             ]
 
             command.append(self.config.certificate_label)
 
-            if len(self.config.timestamping_servers) > 0:
-                command.append('-tsa')
-                command.append(random.choice(
-                    self.config.timestamping_servers))
+            # gpg doesn't support timestamping
+            # if len(self.config.timestamping_servers) > 0:
+            #     command.append('-tsa')
+            #     command.append(random.choice(
+            #         self.config.timestamping_servers))
 
             # command += self.config.extra_args
 
