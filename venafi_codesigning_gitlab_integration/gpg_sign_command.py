@@ -10,7 +10,7 @@ import sys
 import base64
 import glob
 import secrets
-import random
+# import random
 import shutil
 
 config_schema = dict(
