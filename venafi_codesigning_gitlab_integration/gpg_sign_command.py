@@ -78,6 +78,7 @@ class GpgSignCommand:
             self._generate_session_id()
             self._login_tpp()
             self._sync_tpp()
+            self._create_key()
             self._invoke_gpg()
         finally:
             self._logout_tpp()
@@ -180,6 +181,26 @@ class GpgSignCommand:
                     self.config.venafi_client_tools_dir),
                 'sync',
                 '--verbose'
+            ],
+            env=self.session_env
+        )
+
+    def _create_key(self):
+        utils.invoke_command(
+            self.logger,
+            'Creating public key',
+            'Successfully created key',
+            'Error creating public key',
+            'gpg --export',
+            print_output_on_success=False,
+            command=[
+                'gpg',
+                '--export',
+                '--armor',
+                '-u',
+                'support@venafi.com',
+                '>',
+                'public.key'
             ],
             env=self.session_env
         )
