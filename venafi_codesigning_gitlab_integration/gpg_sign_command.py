@@ -196,14 +196,6 @@ class GpgSignCommand:
 
             command.append(self.config.certificate_label)
 
-            # gpg doesn't support timestamping
-            # if len(self.config.timestamping_servers) > 0:
-            #     command.append('-tsa')
-            #     command.append(random.choice(
-            #         self.config.timestamping_servers))
-
-            # command += self.config.extra_args
-
             command.append('--detach-sign')
             command.append(input_path)
 
