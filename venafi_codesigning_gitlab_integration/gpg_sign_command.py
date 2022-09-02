@@ -191,7 +191,7 @@ class GpgSignCommand:
 
         publicKeyPath = str(Path(self.input_paths[0]).parent.absolute().joinpath('public.key'))
 
-        command=[
+        command = [
             'gpg',
             '--export',
             '--armor',
