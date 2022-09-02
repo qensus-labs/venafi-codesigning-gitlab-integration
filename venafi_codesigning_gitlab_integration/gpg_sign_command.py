@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-# import pathlib
+from pathlib import Path
 from typing import List
 from venafi_codesigning_gitlab_integration import utils
 import envparse
@@ -17,11 +17,12 @@ config_schema = dict(
     TPP_AUTH_URL=str,
     TPP_HSM_URL=str,
     TPP_USERNAME=str,
-    TPP_PASSWORD=dict(cast=str, default=None),
-    TPP_PASSWORD_BASE64=dict(cast=str, default=None),
+    CERTIFICATE_LABEL=str,
+    PUBLIC_KEY_USER=str,
     GNUPGHOME=str,
 
-    CERTIFICATE_LABEL=str,
+    TPP_PASSWORD=dict(cast=str, default=None),
+    TPP_PASSWORD_BASE64=dict(cast=str, default=None),
     INPUT_PATH=dict(cast=str, default=None),
     INPUT_GLOB=dict(cast=str, default=None),
     TIMESTAMPING_SERVERS=dict(cast=list, subcast=str, default=()),
@@ -39,6 +40,7 @@ class GpgSignConfig:
     tpp_hsm_url: str
     tpp_username: str
     certificate_label: str
+    public_key_user: str
     gnupghome: str
 
     tpp_password: str = None
@@ -186,22 +188,27 @@ class GpgSignCommand:
         )
 
     def _create_key(self):
-        utils.invoke_command(
-            self.logger,
-            'Creating public key',
-            'Successfully created key',
-            'Error creating public key',
-            'gpg --export',
-            print_output_on_success=False,
+
+            publicKeyPath = str(Path(self.input_paths[0]).parent.absolute().joinpath('public.key'))
+
             command=[
                 'gpg',
                 '--export',
                 '--armor',
                 '-u',
-                'support@venafi.com',
-                '>',
-                'public.key'
-            ],
+                self.config.public_key_user,
+                '--output',
+                publicKeyPath
+            ]
+
+            utils.invoke_command(
+            self.logger,
+            'Creating public key ' + publicKeyPath,
+            'Successfully created key',
+            'Error creating public key',
+            'gpg --export',
+            print_output_on_success=False,
+            command=command,
             env=self.session_env
         )
 
@@ -212,13 +219,11 @@ class GpgSignCommand:
                 '--output',
                 input_path + '.sig',
                 '--no-tty',
-                '--default-key'
+                '--default-key',
+                self.config.certificate_label,
+                '--detach-sign',
+                input_path
             ]
-
-            command.append(self.config.certificate_label)
-
-            command.append('--detach-sign')
-            command.append(input_path)
 
             utils.invoke_command(
                 self.logger,
