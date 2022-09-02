@@ -189,19 +189,19 @@ class GpgSignCommand:
 
     def _create_key(self):
 
-            publicKeyPath = str(Path(self.input_paths[0]).parent.absolute().joinpath('public.key'))
+        publicKeyPath = str(Path(self.input_paths[0]).parent.absolute().joinpath('public.key'))
 
-            command=[
-                'gpg',
-                '--export',
-                '--armor',
-                '-u',
-                self.config.public_key_user,
-                '--output',
-                publicKeyPath
-            ]
+        command=[
+            'gpg',
+            '--export',
+            '--armor',
+            '-u',
+            self.config.public_key_user,
+            '--output',
+            publicKeyPath
+        ]
 
-            utils.invoke_command(
+        utils.invoke_command(
             self.logger,
             'Creating public key ' + publicKeyPath,
             'Successfully created key',
