@@ -9,3 +9,4 @@ __pycache__
 /dist
 /venv
 VenafiCodeSigningClients.rpm
+VenafiCodeSigningClients.msi
