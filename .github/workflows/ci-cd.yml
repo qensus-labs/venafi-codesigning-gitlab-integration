@@ -17,19 +17,11 @@ env:
   VENAFI_CLIENT_TOOL_VERSIONS: |
     [
       {
-        "venafi_major_minor_version": "20.3",
+        "venafi_major_minor_version": "21.4",
         "venafi_patch_version": "0"
       },
       {
-        "venafi_major_minor_version": "20.4",
-        "venafi_patch_version": "0"
-      },
-      {
-        "venafi_major_minor_version": "21.1",
-        "venafi_patch_version": "0"
-      },
-      {
-        "venafi_major_minor_version": "21.2",
+        "venafi_major_minor_version": "22.3",
         "venafi_patch_version": "0",
         "is_latest_venafi_version": true
       }
