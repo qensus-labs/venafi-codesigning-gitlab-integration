@@ -1,4 +1,4 @@
-FROM centos:8
+FROM rockylinux:8
 
 ADD DOCKER-IMAGE-LICENSE.txt /license.txt
 
