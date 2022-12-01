@@ -12,7 +12,7 @@ on:
         required: true
 
 env:
-  QUAY_USERNAME: fullstaq-venafi-gitlab-integration
+  QUAY_USERNAME: venafi_oss
   PYPI_USERNAME: fullstaq-venafi-gitlab-integration
   VENAFI_CLIENT_TOOL_VERSIONS: |
     [
