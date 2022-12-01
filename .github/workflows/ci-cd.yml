@@ -108,7 +108,7 @@ jobs:
         run: >
           curl -fsSL
           -o venafi-codesigningclients-linux-x86_64.rpm
-          "https://fsvenafigitlabcicd.blob.core.windows.net/venafi-client-tools/${SUBDIR}/venafi-codesigningclients-linux-x86_64.rpm?${AZURE_STORAGE_SAS}"
+          "https://example123456.blob.core.windows.net/venafi-client-tools/${SUBDIR}/venafi-codesigningclients-linux-x86_64.rpm"
         env:
           SUBDIR: ${{ matrix.venafi_major_minor_version }}.${{ matrix.venafi_patch_version }}
           AZURE_STORAGE_SAS: ${{ secrets.VENAFI_CLIENT_TOOLS_STORAGE_ACCESS_KEY }}
@@ -165,7 +165,7 @@ jobs:
         run: >
           Invoke-WebRequest
           -OutFile VenafiCodeSigningClients-x64.msi
-          -Uri "https://fsvenafigitlabcicd.blob.core.windows.net/venafi-client-tools/$($env:SUBDIR)/VenafiCodeSigningClients-x64.msi?$($env:AZURE_STORAGE_SAS)"
+          -Uri "https://example123456.blob.core.windows.net/venafi-client-tools/$($env:SUBDIR)/VenafiCodeSigningClients-x64.msi"
         env:
           SUBDIR: ${{ matrix.venafi_major_minor_version }}.${{ matrix.venafi_patch_version }}
           AZURE_STORAGE_SAS: ${{ secrets.VENAFI_CLIENT_TOOLS_STORAGE_ACCESS_KEY }}
