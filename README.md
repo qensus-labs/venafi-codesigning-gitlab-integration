@@ -724,14 +724,14 @@ Where:
 
          We only provide images for the latest tiny version, which is why you can't specify the tiny version number in the tag. So for example, if only product versions 1.0.0 and 1.0.1 exist, we only provide an image for 1.0 (which contains product version 1.0.1).
 
-       - `VENAFI CLIENT TOOLS VERSION` is the version of the Venafi client tools that you wish to use, for example `20.4`.
+       - `VENAFI CLIENT TOOLS VERSION` is the version of the Venafi client tools that you wish to use, for example `22.3`.
 
     - `ARCHITECTURE` is the architecture of the node on which you plan to run the container. Currently, only `x86_64` is available.
 
-Example: product version 1.0 + Venafi client tools 20.4, for use with Jarsigner on x86\_64:
+Example: product version 1.2 + Venafi client tools 22.3, for use with Jarsigner on x86\_64:
 
 ~~~
-quay.io/venafi-gitlab-integration/codesigning-jarsigner:1.0-20.4-x86_64
+quay.io/venafi-gitlab-integration/codesigning-jarsigner:1.2-22.3-x86_64
 ~~~
 
 Example: latest product version + latest Venafi client tools, for use with Signtool on x86\_64:
@@ -751,8 +751,8 @@ You can see the available tags on Quay.io:
 
  * We always supply the latest version of Signtool.
  * We always supply the latest version of Jarsigner, as is installable via the base image's package manager.
-    - Our Jarsigner images are currently based on CentOS 8, so we always supply the latest Jarsigner as is provided by CentOS 8's YUM repository.
- * We supply the latest 4 minor versions of the Venafi client tools, though no earlier than 20.02 (for example: 20.5 + 20.4 + 20.3 + 20.2).
+    - Our Jarsigner images are currently based on RockyOS 8, so we always supply the latest Jarsigner as is provided by RockyOS 8's YUM repository.
+ * We supply the last minor versions of the Venafi client tools, though no earlier than 21. (for example: 22.3 and 21.4).
     - For each Venafi client tools minor version, we always supply the latest patch version.
 
 ## Signtool caveats
