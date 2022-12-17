@@ -2,7 +2,7 @@ This Venafi CodeSigning Gitlab integration is licensed under Apache 2.0, as writ
 
 As part of this Gitlab integration product, we also supply a number of Docker images. These images are licensed separately and are proprietary:
 
-> This binary software is the property of Venafi Inc., which is licensed to Fullstaq B.V. All rights reserved by Venafi Inc.
+> This binary software is the property of Venafi Inc., which is licensed to Qensu B.V. All rights reserved by Venafi Inc.
 
 ---
 
@@ -194,7 +194,7 @@ As part of this Gitlab integration product, we also supply a number of Docker im
       same "printed page" as the copyright notice for easier
       identification within third-party archives.
 
-   Copyright 2020 Venafi in coorporation with Fullstaq Labs
+   Copyright 2020 Venafi in coorporation with Qensus Labs
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.

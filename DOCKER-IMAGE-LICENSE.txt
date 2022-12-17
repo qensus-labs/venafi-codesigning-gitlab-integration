@@ -1,1 +1,1 @@
-This binary software is the property of Venafi Inc., which is licensed to Fullstaq B.V. All rights reserved by Venafi Inc.
+This binary software is the property of Venafi Inc., which is licensed to Qensus B.V. All rights reserved by Venafi Inc.
