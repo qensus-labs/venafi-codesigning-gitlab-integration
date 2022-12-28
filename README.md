@@ -84,7 +84,7 @@ This section shows how to sign one or more files with Java's [Jarsigner](https:/
 #### Docker executor
 
  * Define a job that calls `venafi-sign-jarsigner`.
- * Ensure the job operates within the image `quay.io/fullstaq-venafi-gitlab-integration/codesigning-jarsigner:<TAG>`.
+ * Ensure the job operates within the image `quay.io/venafi-gitlab-integration/codesigning-jarsigner:<TAG>`.
     - Select a tag based on the Venafi client tools version that you require. See [Docker images](#docker-images).
  * Set the `INPUT_PATH` or `INPUT_GLOB` variable to the file(s) that you wish to sign.
  * Set other required variables too. See the variables reference below.
@@ -109,7 +109,7 @@ build_jar:
 # then store the signed jar as an artifact.
 sign_jarsigner:
   stage: sign
-  image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-jarsigner:latest-x86_64
+  image: quay.io/venafi-gitlab-integration/codesigning-jarsigner:latest-x86_64
   script:
     - venafi-sign-jarsigner
   variables:
@@ -214,7 +214,7 @@ Optional:
 
    ~~~yaml
    sign_jarsigner:
-     image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-jarsigner:latest-x86_64
+     image: quay.io/venafi-gitlab-integration/codesigning-jarsigner:latest-x86_64
      script:
        - wget -O /downloaded-ca.crt https://internal.company.url/path-to-your-ca-chain.crt
        - venafi-sign-jarsigner
@@ -242,7 +242,7 @@ This section shows how to verify one or more files with Java's [Jarsigner](https
 #### Docker executor
 
  * Define a job that calls `venafi-verify-jarsigner`.
- * Ensure the job operates within the image `quay.io/fullstaq-venafi-gitlab-integration/codesigning-jarsigner:<TAG>`.
+ * Ensure the job operates within the image `quay.io/venafi-gitlab-integration/codesigning-jarsigner:<TAG>`.
     - Select a tag based on the Venafi client tools version that you require. See [Docker images](#docker-images).
  * Set the `INPUT_PATH` or `INPUT_GLOB` variable to the file(s) that you wish to verify.
  * Set other required variables too. See the variables reference below.
@@ -264,7 +264,7 @@ fetch_jar:
 # Verify 'signed.jar' that was fetched by the 'fetch' stage.
 verify_jarsigner:
   stage: verify
-  image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-jarsigner:latest-x86_64
+  image: quay.io/venafi-gitlab-integration/codesigning-jarsigner:latest-x86_64
   script:
     - venafi-verify-jarsigner
   variables:
@@ -334,7 +334,7 @@ Optional:
 
    ~~~yaml
    verify_jarsigner:
-     image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-jarsigner:latest-x86_64
+     image: quay.io/venafi-gitlab-integration/codesigning-jarsigner:latest-x86_64
      script:
        - wget -O /downloaded-ca.crt https://internal.company.url/path-to-your-ca-chain.crt
        - venafi-verify-jarsigner
@@ -365,7 +365,7 @@ Usage instructions:
 
  * Define a job that calls `venafi-sign-signtool`.
  * Ensure that this job runs on a Windows-based runner, by setting the proper tags.
- * Ensure this job operates within the image `quay.io/fullstaq-venafi-gitlab-integration/codesigning-signtool:<TAG>`.
+ * Ensure this job operates within the image `quay.io/venafi-gitlab-integration/codesigning-signtool:<TAG>`.
     - Select a tag based on the Venafi client tools version that you require. See [Docker images](#docker-images).
  * Set the `INPUT_PATH` variable to a filename or a glob that you wish to sign.
  * Set other required variables too. See the variables reference below.
@@ -384,7 +384,7 @@ stages:
 # Build a 'foo.exe' and pass it as an artifact to the 'sign' stage.
 build_exe:
   stage: build
-  image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-signtool:latest-x86_64
+  image: quay.io/venafi-gitlab-integration/codesigning-signtool:latest-x86_64
   tags:
     - windows
   script:
@@ -397,7 +397,7 @@ build_exe:
 # then store the signed exe as an artifact.
 sign_signtool:
   stage: sign
-  image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-signtool:latest-x86_64
+  image: quay.io/venafi-gitlab-integration/codesigning-signtool:latest-x86_64
   tags:
     - windows
   script:
@@ -568,7 +568,7 @@ Usage instructions:
 
  * Define a job that calls `venafi-verify-signtool`.
  * Ensure that this job runs on a Windows-based runner, by setting the proper tags.
- * Ensure this job operates within the image `quay.io/fullstaq-venafi-integration/codesigning-signtool:<TAG>`.
+ * Ensure this job operates within the image `quay.io/venafi-integration/codesigning-signtool:<TAG>`.
     - Select a tag based on the Venafi client tools version that you require. See [Docker images](#docker-images).
  * Set the `INPUT_PATH` variable to a filename or a glob that you wish to verify.
  * Set other required variables too. See the variables reference below.
@@ -586,7 +586,7 @@ stages:
 # Fetch a signed 'signed.exe' and pass it as an artifact to the 'verify' stage.
 fetch_exe:
   stage: fetch
-  image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-signtool:latest-x86_64
+  image: quay.io/venafi-gitlab-integration/codesigning-signtool:latest-x86_64
   tags:
     - windows
   script:
@@ -598,7 +598,7 @@ fetch_exe:
 # Verify 'signed.exe' that was fetched by the 'fetch' stage.
 verify_signtool:
   stage: sign
-  image: quay.io/fullstaq-venafi-gitlab-integration/codesigning-signtool:latest-x86_64
+  image: quay.io/venafi-gitlab-integration/codesigning-signtool:latest-x86_64
   tags:
     - windows
   script:
@@ -706,7 +706,7 @@ We supply a number of Docker images, for the purpose of using this Gitlab integr
 Images have the following address format:
 
 ~~~
-quay.io/fullstaq-venafi-gitlab-integration/codesigning-<SIGNING TOOL>:<TAG>
+quay.io/venafi-gitlab-integration/codesigning-<SIGNING TOOL>:<TAG>
 ~~~
 
 Where:
@@ -720,39 +720,39 @@ Where:
 
     - Specify `<PRODUCT VERSION>-<VENAFI CLIENT TOOLS VERSION>-<ARCHITECTURE>` as tag, if you want to have more control.
 
-       - `PRODUCT VERSION` is the major + minor version of this Gitlab integration product. See [the releases list](https://github.com/fullstaq-labs/venafi-codesigning-gitlab-integration/releases) to learn which versions are available.
+       - `PRODUCT VERSION` is the major + minor version of this Gitlab integration product. See [the releases list](https://github.com/labs/venafi-codesigning-gitlab-integration/releases) to learn which versions are available.
 
          We only provide images for the latest tiny version, which is why you can't specify the tiny version number in the tag. So for example, if only product versions 1.0.0 and 1.0.1 exist, we only provide an image for 1.0 (which contains product version 1.0.1).
 
-       - `VENAFI CLIENT TOOLS VERSION` is the version of the Venafi client tools that you wish to use, for example `20.4`.
+       - `VENAFI CLIENT TOOLS VERSION` is the version of the Venafi client tools that you wish to use, for example `22.3`.
 
     - `ARCHITECTURE` is the architecture of the node on which you plan to run the container. Currently, only `x86_64` is available.
 
-Example: product version 1.0 + Venafi client tools 20.4, for use with Jarsigner on x86\_64:
+Example: product version 1.2 + Venafi client tools 22.3, for use with Jarsigner on x86\_64:
 
 ~~~
-quay.io/fullstaq-venafi-gitlab-integration/codesigning-jarsigner:1.0-20.4-x86_64
+quay.io/venafi-gitlab-integration/codesigning-jarsigner:1.2-22.3-x86_64
 ~~~
 
 Example: latest product version + latest Venafi client tools, for use with Signtool on x86\_64:
 
 ~~~
-quay.io/fullstaq-venafi-gitlab-integration/codesigning-signtool:latest-x86_64
+quay.io/venafi-gitlab-integration/codesigning-signtool:latest-x86_64
 ~~~
 
 ### List of published Docker image tags
 
 You can see the available tags on Quay.io:
 
- * [codesigning-jarsigner](https://quay.io/repository/fullstaq-venafi-gitlab-integration/codesigning-jarsigner?tab=tags)
- * [codesigning-signtool](https://quay.io/repository/fullstaq-venafi-gitlab-integration/codesigning-signtool?tab=tags)
+ * [codesigning-jarsigner](https://quay.io/repository/venafi-gitlab-integration/codesigning-jarsigner?tab=tags)
+ * [codesigning-signtool](https://quay.io/repository/venafi-gitlab-integration/codesigning-signtool?tab=tags)
 
 ### Image versioning policy
 
  * We always supply the latest version of Signtool.
  * We always supply the latest version of Jarsigner, as is installable via the base image's package manager.
-    - Our Jarsigner images are currently based on CentOS 8, so we always supply the latest Jarsigner as is provided by CentOS 8's YUM repository.
- * We supply the latest 4 minor versions of the Venafi client tools, though no earlier than 20.02 (for example: 20.5 + 20.4 + 20.3 + 20.2).
+    - Our Jarsigner images are currently based on RockyOS 8, so we always supply the latest Jarsigner as is provided by RockyOS 8's YUM repository.
+ * We supply the last minor versions of the Venafi client tools, though no earlier than 21. (for example: 22.3 and 21.4).
     - For each Venafi client tools minor version, we always supply the latest patch version.
 
 ## Signtool caveats
@@ -762,6 +762,26 @@ When using Signtool, you must ensure that all your TPP environments disable the 
 If you do not do this, then Signtool will trigger a confirmation dialog box, in which Windows asks for approval to import root certificates. Signtool can't continue until a human manually clicks "Yes".
 
 This is especially problematic when using Signtool in a container, because there is no user interface, so it's impossible to click on anything.
+
+## Gitlab Runner caveats
+
+When using the Signtool Docker image (which is based on Windows ltsc2019) you may have to ensure that the `shell` have to be set to `powershell` in the runner configuration, because since [Gitlab Runner 14 and later](https://docs.gitlab.com/runner/shells/) the default behavior changed. The default shell is now set to `pwsh`.
+
+The following error can occur when the shell is not set correctly.
+
+```
+FileNotFoundError: [WinError 2] The system cannot find the file specified
+```
+
+# Git caveats
+
+When using the Signtool Docker image you may get ownership errors due to recent Git restrictions. You can solve this by adding a `pre_clone_script` and `post_clone_script` to the runner configuration that
+includes the git command to configure safe directories like `git config --global --add safe.directory '*'`. You may want to change the '*' to a specific directory.
+
+The following error can occur when dubious ownership is detected.
+```
+fatal: detected dubious ownership in repository at
+```
 
 ## Contribution & development
 

@@ -20,8 +20,8 @@
      * Access tier: Cool.
      * Set the directory equal to the full Venafi client tools version, including patch version. For example: `20.4.0`
 
- 4. Ensure [the CI](https://github.com/fullstaq-labs/venafi-codesigning-gitlab-integration/actions) is successful.
+ 4. Ensure [the CI](https://github.com/qensus-labs/venafi-codesigning-gitlab-integration/actions) is successful.
 
- 5. [Manually run the "CI/CD" workflow](https://github.com/fullstaq-labs/venafi-codesigning-gitlab-integration/actions/workflows/ci-cd.yml). Set the `create_release` parameter to `true`. Wait until it finishes. This creates a draft release.
+ 5. [Manually run the "CI/CD" workflow](https://github.com/qensus-labs/venafi-codesigning-gitlab-integration/actions/workflows/ci-cd.yml). Set the `create_release` parameter to `true`. Wait until it finishes. This creates a draft release.
 
- 6. Edit [the draft release](https://github.com/fullstaq-labs/venafi-codesigning-gitlab-integration/releases)'s notes and finalize the release.
+ 6. Edit [the draft release](https://github.com/qensus-labs/venafi-codesigning-gitlab-integration/releases)'s notes and finalize the release.

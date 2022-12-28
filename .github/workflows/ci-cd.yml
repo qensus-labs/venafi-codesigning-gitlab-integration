@@ -12,24 +12,16 @@ on:
         required: true
 
 env:
-  QUAY_USERNAME: fullstaq-venafi-gitlab-integration
+  QUAY_USERNAME: venafi_oss
   PYPI_USERNAME: fullstaq-venafi-gitlab-integration
   VENAFI_CLIENT_TOOL_VERSIONS: |
     [
       {
-        "venafi_major_minor_version": "20.3",
+        "venafi_major_minor_version": "21.4",
         "venafi_patch_version": "0"
       },
       {
-        "venafi_major_minor_version": "20.4",
-        "venafi_patch_version": "0"
-      },
-      {
-        "venafi_major_minor_version": "21.1",
-        "venafi_patch_version": "0"
-      },
-      {
-        "venafi_major_minor_version": "21.2",
+        "venafi_major_minor_version": "22.3",
         "venafi_patch_version": "0",
         "is_latest_venafi_version": true
       }
@@ -116,7 +108,7 @@ jobs:
         run: >
           curl -fsSL
           -o venafi-codesigningclients-linux-x86_64.rpm
-          "https://fsvenafigitlabcicd.blob.core.windows.net/venafi-client-tools/${SUBDIR}/venafi-codesigningclients-linux-x86_64.rpm?${AZURE_STORAGE_SAS}"
+          "https://example123456.blob.core.windows.net/venafi-client-tools/${SUBDIR}/venafi-codesigningclients-linux-x86_64.rpm"
         env:
           SUBDIR: ${{ matrix.venafi_major_minor_version }}.${{ matrix.venafi_patch_version }}
           AZURE_STORAGE_SAS: ${{ secrets.VENAFI_CLIENT_TOOLS_STORAGE_ACCESS_KEY }}
@@ -130,7 +122,7 @@ jobs:
         run: >
           docker build
           --pull
-          --cache-from "quay.io/${QUAY_USERNAME}/cache_codesigning-jarsigner:${{ matrix.venafi_major_minor_version }}-x86_64"
+          --cache-from "quay.io/venafi-gitlab-integration/cache_codesigning-jarsigner:${{ matrix.venafi_major_minor_version }}-x86_64"
           --build-arg BUILDKIT_INLINE_CACHE=1
           -f images/jarsigner/Dockerfile
           -t jarsigner_image
@@ -140,13 +132,13 @@ jobs:
 
       - name: Upload artifact
         run: |
-          IMAGE_NAME="quay.io/${QUAY_USERNAME}/ci-artifact_codesigning-jarsigner:cirun${{ github.run_number }}-${{ matrix.venafi_major_minor_version }}-x86_64"
+          IMAGE_NAME="quay.io/venafi-gitlab-integration/ci-artifact_codesigning-jarsigner:cirun${{ github.run_number }}-${{ matrix.venafi_major_minor_version }}-x86_64"
           docker tag jarsigner_image "$IMAGE_NAME"
           docker push "$IMAGE_NAME"
 
       - name: Update cache
         run: |
-          IMAGE_NAME="quay.io/${QUAY_USERNAME}/cache_codesigning-jarsigner:${{ matrix.venafi_major_minor_version }}-x86_64"
+          IMAGE_NAME="quay.io/venafi-gitlab-integration/cache_codesigning-jarsigner:${{ matrix.venafi_major_minor_version }}-x86_64"
           docker tag jarsigner_image "$IMAGE_NAME"
           docker push "$IMAGE_NAME"
 
@@ -173,7 +165,7 @@ jobs:
         run: >
           Invoke-WebRequest
           -OutFile VenafiCodeSigningClients-x64.msi
-          -Uri "https://fsvenafigitlabcicd.blob.core.windows.net/venafi-client-tools/$($env:SUBDIR)/VenafiCodeSigningClients-x64.msi?$($env:AZURE_STORAGE_SAS)"
+          -Uri "https://example123456.blob.core.windows.net/venafi-client-tools/$($env:SUBDIR)/VenafiCodeSigningClients-x64.msi"
         env:
           SUBDIR: ${{ matrix.venafi_major_minor_version }}.${{ matrix.venafi_patch_version }}
           AZURE_STORAGE_SAS: ${{ secrets.VENAFI_CLIENT_TOOLS_STORAGE_ACCESS_KEY }}
@@ -195,7 +187,7 @@ jobs:
 
       - name: Upload artifact
         run: |
-          $image_name = "quay.io/$($env:QUAY_USERNAME)/ci-artifact_codesigning-signtool:cirun${{ github.run_number }}-${{ matrix.venafi_major_minor_version }}-x86_64"
+          $image_name = "quay.io/venafi-gitlab-integration/ci-artifact_codesigning-signtool:cirun${{ github.run_number }}-${{ matrix.venafi_major_minor_version }}-x86_64"
           docker tag signtool_image $image_name
           if ($LastExitCode -ne 0) {
             exit 1
@@ -230,13 +222,13 @@ jobs:
 
 
       - name: Download image artifact
-        run: docker pull "quay.io/${QUAY_USERNAME}/ci-artifact_codesigning-jarsigner:cirun${{ github.run_number }}-${{ matrix.venafi_major_minor_version }}-x86_64"
+        run: docker pull "quay.io/venafi-gitlab-integration/ci-artifact_codesigning-jarsigner:cirun${{ github.run_number }}-${{ matrix.venafi_major_minor_version }}-x86_64"
 
       - name: Determine image tag names
         run: |
-          echo ARTIFACT_IMAGE_NAME="quay.io/${QUAY_USERNAME}/ci-artifact_codesigning-jarsigner:cirun${{ github.run_number }}-${{ matrix.venafi_major_minor_version }}-x86_64" >> "$GITHUB_ENV"
-          echo VERSIONED_IMAGE_NAME="quay.io/${QUAY_USERNAME}/codesigning-jarsigner:${PRODUCT_MAJOR_MINOR_VERSION}-${{ matrix.venafi_major_minor_version }}-x86_64" >> "$GITHUB_ENV"
-          echo LATEST_IMAGE_NAME="quay.io/${QUAY_USERNAME}/codesigning-jarsigner:latest-x86_64" >> "$GITHUB_ENV"
+          echo ARTIFACT_IMAGE_NAME="quay.io/venafi-gitlab-integration/ci-artifact_codesigning-jarsigner:cirun${{ github.run_number }}-${{ matrix.venafi_major_minor_version }}-x86_64" >> "$GITHUB_ENV"
+          echo VERSIONED_IMAGE_NAME="quay.io/venafi-gitlab-integration/codesigning-jarsigner:${PRODUCT_MAJOR_MINOR_VERSION}-${{ matrix.venafi_major_minor_version }}-x86_64" >> "$GITHUB_ENV"
+          echo LATEST_IMAGE_NAME="quay.io/venafi-gitlab-integration/codesigning-jarsigner:latest-x86_64" >> "$GITHUB_ENV"
 
       - name: Set image tags
         run: |
@@ -296,13 +288,13 @@ jobs:
 
 
       - name: Download image artifact
-        run: docker pull "quay.io/$($env:QUAY_USERNAME)/ci-artifact_codesigning-signtool:cirun${{ github.run_number }}-${{ matrix.venafi_major_minor_version }}-x86_64"
+        run: docker pull "quay.io/venafi-gitlab-integration/ci-artifact_codesigning-signtool:cirun${{ github.run_number }}-${{ matrix.venafi_major_minor_version }}-x86_64"
 
       - name: Determine image tag names
         run: |
-          echo "ARTIFACT_IMAGE_NAME=quay.io/$($env:QUAY_USERNAME)/ci-artifact_codesigning-signtool:cirun${{ github.run_number }}-${{ matrix.venafi_major_minor_version }}-x86_64" >> $env:GITHUB_ENV
-          echo "VERSIONED_IMAGE_NAME=quay.io/$($env:QUAY_USERNAME)/codesigning-signtool:$($env:PRODUCT_MAJOR_MINOR_VERSION)-${{ matrix.venafi_major_minor_version }}-x86_64" >> $env:GITHUB_ENV
-          echo "LATEST_IMAGE_NAME=quay.io/$($env:QUAY_USERNAME)/codesigning-signtool:latest-x86_64" >> $env:GITHUB_ENV
+          echo "ARTIFACT_IMAGE_NAME=quay.io/venafi-gitlab-integration/ci-artifact_codesigning-signtool:cirun${{ github.run_number }}-${{ matrix.venafi_major_minor_version }}-x86_64" >> $env:GITHUB_ENV
+          echo "VERSIONED_IMAGE_NAME=quay.io/venafi-gitlab-integration/codesigning-signtool:$($env:PRODUCT_MAJOR_MINOR_VERSION)-${{ matrix.venafi_major_minor_version }}-x86_64" >> $env:GITHUB_ENV
+          echo "LATEST_IMAGE_NAME=quay.io/venafi-gitlab-integration/codesigning-signtool:latest-x86_64" >> $env:GITHUB_ENV
 
       - name: Set image tags
         run: |

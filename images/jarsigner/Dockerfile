@@ -1,9 +1,11 @@
-FROM centos:8
+FROM rockylinux:8
 
 ADD DOCKER-IMAGE-LICENSE.txt /license.txt
 
-RUN dnf install -y python38 java-11-openjdk-devel && \
+RUN dnf install -y python39 java-11-openjdk-devel && \
     dnf clean all
+
+RUN pip3 install --upgrade pip
 
 ADD venafi-codesigningclients-linux-x86_64.rpm /build/
 RUN dnf install -y /build/*.rpm && \
