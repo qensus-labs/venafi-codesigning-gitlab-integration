@@ -763,6 +763,26 @@ If you do not do this, then Signtool will trigger a confirmation dialog box, in 
 
 This is especially problematic when using Signtool in a container, because there is no user interface, so it's impossible to click on anything.
 
+## Gitlab Runner caveats
+
+When using the Signtool Docker image (which is based on Windows ltsc2019) you may have to ensure that the `shell` have to be set to `powershell` in the runner configuration, because since [Gitlab Runner 14 and later](https://docs.gitlab.com/runner/shells/) the default behavior changed. The default shell is now set to `pwsh`.
+
+The following error can occur when the shell is not set correctly.
+
+```
+FileNotFoundError: [WinError 2] The system cannot find the file specified
+```
+
+# Git caveats
+
+When using the Signtool Docker image you may get ownership errors due to recent Git restrictions. You can solve this by adding a `pre_clone_script` and `post_clone_script` to the runner configuration that
+includes the git command to configure safe directories like `git config --global --add safe.directory '*'`. You may want to change the '*' to a specific directory.
+
+The following error can occur when dubious ownership is detected.
+```
+fatal: detected dubious ownership in repository at
+```
+
 ## Contribution & development
 
 See the [contribution guide](CONTRIBUTING.md).
